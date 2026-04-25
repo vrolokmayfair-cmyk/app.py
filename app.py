@@ -30,6 +30,7 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
+# Inicializar base de datos en la sesión
 if 'db' not in st.session_state:
     st.session_state.db = pd.DataFrame(columns=["Nombre", "Nivel", "Calificación", "Intentos", "Rango", "Fecha"])
 
@@ -70,7 +71,7 @@ with st.sidebar:
     # --- PANEL DE ADMINISTRADOR ---
     with st.expander("🔐 Acceso Administrador"):
         admin_pass = st.text_input("Contraseña:", type="password")
-        is_admin = admin_pass == "CSB2026" # Puedes cambiar esta contraseña
+        is_admin = (admin_pass == "CSB2026")
 
 if not nombre_user:
     st.warning("⬅️ Ingresa tu nombre en el panel lateral para comenzar.")
@@ -78,6 +79,7 @@ else:
     hist = st.session_state.db[st.session_state.db["Nombre"] == nombre_user]
     num_intentos = len(hist)
     
+    # Lógica de niveles
     if num_intentos > 0 and hist.iloc[-1]["Calificación"] >= 10:
         ultimo_nv = hist.iloc[-1]["Nivel"]
         if ultimo_nv == "Básico": nivel, rango = "Avanzado", "Plata"
@@ -100,6 +102,7 @@ else:
                 st.success("¡Excelente!"); calif = 10.0
             else:
                 st.error(f"La respuesta era: {st.session_state.ejercicio_actual['c']}"); calif = 0.0
+            
             log = {"Nombre": nombre_user, "Nivel": nivel, "Calificación": calif, "Intentos": num_intentos + 1, "Rango": rango, "Fecha": datetime.datetime.now().strftime("%d/%m/%Y %H:%M")}
             st.session_state.db = pd.concat([st.session_state.db, pd.DataFrame([log])], ignore_index=True)
             st.session_state.ejercicio_actual = None
@@ -138,34 +141,40 @@ else:
         c1, c2 = st.columns(2)
         with c1:
             with st.expander("📌 Interés Ordinario"):
-                st.write("**Definición:** Es el costo pactado por el uso del dinero prestado durante el plazo del crédito.")
+                st.write("**Definición:** Es el costo pactado por el uso del dinero prestado.")
             with st.expander("📌 Tabla de Amortización"):
-                st.write("**Definición:** Documento que detalla cómo se divide cada uno de tus pagos.")
+                st.write("**Definición:** Documento que desglosa capital, intereses y seguros.")
             with st.expander("📌 Saldos Insolutos"):
-                st.write("**Definición:** El interés se cobra sobre lo que aún se debe.")
+                st.write("**Definición:** Interés cobrado sobre el saldo pendiente actual.")
         with c2:
             with st.expander("⚠️ Interés Compuesto"):
-                st.error("🔒 **Seguridad CSB:** Cero riesgo de interés compuesto por ser Tasa Fija.")
+                st.error("🔒 **Seguridad CSB:** Cero riesgo de interés compuesto por Tasa Fija.")
             with st.expander("📊 CAT"):
-                st.write("**Definición:** Indicador que suma todos los costos del crédito.")
+                st.write("**Definición:** Costo total anual (tasa + seguros + comisiones).")
             with st.expander("📋 Requisitos"):
                 st.markdown("- **INE Vigente**\n- **Correo con acceso a SIPRE**\n- **WhatsApp activo**")
 
     with tabs[3]:
-        st.subheader("📊 Historial Personal")
+        # Sección del Asesor
+        st.subheader("📊 Tu Historial Personal")
         if not hist.empty:
             st.dataframe(hist[["Fecha", "Nivel", "Calificación"]], use_container_width=True)
-            
-            # Solo aparece si la contraseña en la sidebar es correcta
-            if is_admin:
-                st.markdown("---")
-                st.subheader("🔓 Panel de Descarga (Solo Admin)")
+        else:
+            st.info("Aún no tienes evaluaciones registradas en esta sesión.")
+        
+        # Sección exclusiva del Admin (Independiente del historial del asesor)
+        if is_admin:
+            st.markdown("---")
+            st.subheader("🔓 Panel de Control Maestro (Admin)")
+            if not st.session_state.db.empty:
+                st.write("Registros totales en el sistema:", len(st.session_state.db))
                 csv = st.session_state.db.to_csv(index=False).encode('utf-8')
                 st.download_button(
-                    label="📥 Descargar Base de Datos Completa",
+                    label="📥 DESCARGAR REPORTE GENERAL (CSV)",
                     data=csv,
-                    file_name=f"Reporte_General_{datetime.datetime.now().strftime('%d_%m_%Y')}.csv",
+                    file_name=f"Base_Datos_Academia_{datetime.datetime.now().strftime('%d_%m_%Y')}.csv",
                     mime="text/csv",
+                    key="btn_descarga_admin"
                 )
-        else:
-            st.info("No hay datos registrados en tu sesión.")
+            else:
+                st.warning("La base de datos global está vacía. Nadie ha hecho evaluaciones todavía.")
