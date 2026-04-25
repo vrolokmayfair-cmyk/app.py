@@ -65,6 +65,12 @@ with st.sidebar:
     st.write("Escribe tu nombre empezando por **APELLIDOS**.")
     st.caption("Ejemplo: SUMANO GARCIA JUAN CARLOS")
     nombre_user = st.text_input("NOMBRE DEL ASESOR:").strip().upper()
+    
+    st.markdown("---")
+    # --- PANEL DE ADMINISTRADOR ---
+    with st.expander("🔐 Acceso Administrador"):
+        admin_pass = st.text_input("Contraseña:", type="password")
+        is_admin = admin_pass == "CSB2026" # Puedes cambiar esta contraseña
 
 if not nombre_user:
     st.warning("⬅️ Ingresa tu nombre en el panel lateral para comenzar.")
@@ -129,31 +135,37 @@ else:
 
     with tabs[2]:
         st.subheader("📚 Conceptos Clave y Ventajas Consubanco")
-        
         c1, c2 = st.columns(2)
         with c1:
             with st.expander("📌 Interés Ordinario"):
                 st.write("**Definición:** Es el costo pactado por el uso del dinero prestado durante el plazo del crédito.")
-                st.info("💡 **Tip:** En CSB, este interés es transparente y se calcula desde el inicio.")
-            
             with st.expander("📌 Tabla de Amortización"):
-                st.write("**Definición:** Documento que detalla cómo se divide cada uno de tus pagos entre capital, intereses y seguros.")
-                st.success("✅ **Ventaja CSB:** El cliente conoce exactamente su saldo final desde el día 1.")
-
+                st.write("**Definición:** Documento que detalla cómo se divide cada uno de tus pagos.")
             with st.expander("📌 Saldos Insolutos"):
-                st.write("**Definición:** El interés se cobra sobre lo que aún se debe. Si pagas más, el interés baja.")
-                st.info("💡 **Tip:** Esto permite liquidaciones anticipadas con ahorro real.")
-
+                st.write("**Definición:** El interés se cobra sobre lo que aún se debe.")
         with c2:
-            with st.expander("⚠️ Interés Compuesto (Lo que NO tenemos)"):
-                st.write("**Definición:** Es cuando los intereses no pagados se suman al capital, generando 'intereses sobre intereses'.")
-                st.error("🔒 **Seguridad CSB:** Al ser TASA FIJA y DESCUENTO VÍA PENSIÓN, el pago siempre es puntual y el monto nunca sube. ¡Cero riesgo de interés compuesto!")
-
-            with st.expander("📊 CAT (Costo Anual Total)"):
-                st.write("**Definición:** Indicador que suma la tasa, seguros y comisiones para dar el costo real anual.")
-
+            with st.expander("⚠️ Interés Compuesto"):
+                st.error("🔒 **Seguridad CSB:** Cero riesgo de interés compuesto por ser Tasa Fija.")
+            with st.expander("📊 CAT"):
+                st.write("**Definición:** Indicador que suma todos los costos del crédito.")
             with st.expander("📋 Requisitos"):
                 st.markdown("- **INE Vigente**\n- **Correo con acceso a SIPRE**\n- **WhatsApp activo**")
 
     with tabs[3]:
-        st.dataframe(hist[["Fecha", "Nivel", "Calificación"]])
+        st.subheader("📊 Historial Personal")
+        if not hist.empty:
+            st.dataframe(hist[["Fecha", "Nivel", "Calificación"]], use_container_width=True)
+            
+            # Solo aparece si la contraseña en la sidebar es correcta
+            if is_admin:
+                st.markdown("---")
+                st.subheader("🔓 Panel de Descarga (Solo Admin)")
+                csv = st.session_state.db.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="📥 Descargar Base de Datos Completa",
+                    data=csv,
+                    file_name=f"Reporte_General_{datetime.datetime.now().strftime('%d_%m_%Y')}.csv",
+                    mime="text/csv",
+                )
+        else:
+            st.info("No hay datos registrados en tu sesión.")
