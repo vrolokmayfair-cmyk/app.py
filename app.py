@@ -26,10 +26,6 @@ st.markdown(f"""
         background-color: white; box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
         margin-bottom: 20px;
     }}
-    .info-card {{
-        background-color: white; padding: 15px; border-radius: 10px;
-        border-top: 4px solid {COLOR_AZUL}; margin-bottom: 10px;
-    }}
     h1, h2, h3 {{ color: {COLOR_AZUL}; font-family: 'Arial'; }}
     </style>
     """, unsafe_allow_html=True)
@@ -58,8 +54,8 @@ def generar_ejercicio(nivel):
         else:
             tasa_a = random.choice([48, 60, 72])
             return {"p": f"TASA MENSUAL: Si la Tasa Anual es del {tasa_a}%. ¿Cuál es la tasa mensual?", "c": str(tasa_a // 12)}
-    else: # Experto
-        return {"p": "ESCENARIO: ¿Cuál es el principal beneficio de nuestro esquema de pagos para un cliente que quiere liquidar antes de tiempo?", "c": "ahorra intereses"}
+    else:
+        return {"p": "¿Cuál es el principal beneficio de liquidar antes bajo el esquema de Consubanco?", "c": "ahorra intereses"}
 
 st.title("🏦 Academia de Ventas Consubanco")
 
@@ -72,7 +68,7 @@ with st.sidebar:
     nombre_user = st.text_input("NOMBRE DEL ASESOR:").strip().upper()
 
 if not nombre_user:
-    st.warning("⬅️ Por favor, ingresa tu nombre empezando por apellidos en el panel lateral.")
+    st.warning("⬅️ Ingresa tu nombre en el panel lateral para comenzar.")
 else:
     hist = st.session_state.db[st.session_state.db["Nombre"] == nombre_user]
     num_intentos = len(hist)
@@ -87,45 +83,44 @@ else:
 
     st.markdown(f"<div class='rango-box'><h2>{nombre_user}</h2><p><b>Rango:</b> {rango} | <b>Módulo:</b> {nivel}</p></div>", unsafe_allow_html=True)
 
-    tabs = st.tabs(["📝 Evaluación Mixta", "🎙️ Roleplay Modelo B", "📚 Biblioteca Visual", "📊 Evolución"])
+    tabs = st.tabs(["📝 Evaluación", "🎙️ Roleplay Modelo B", "📚 Infografías", "📊 Evolución"])
 
     with tabs[0]:
-        st.subheader(f"Desafío Nivel {nivel}")
-        if st.button("Generar Nueva Pregunta") or st.session_state.ejercicio_actual is None:
+        if st.button("Nueva Pregunta") or st.session_state.ejercicio_actual is None:
             st.session_state.ejercicio_actual = generar_ejercicio(nivel)
         st.info(st.session_state.ejercicio_actual["p"])
         resp_input = st.text_input("Tu respuesta:").strip().lower()
         if st.button("Validar"):
             if resp_input == st.session_state.ejercicio_actual["c"]:
-                st.success("¡Excelente! Respuesta correcta."); calif = 10.0
+                st.success("¡Excelente!"); calif = 10.0
             else:
-                st.error(f"Incorrecto. La respuesta era: {st.session_state.ejercicio_actual['c']}"); calif = 0.0
+                st.error(f"La respuesta era: {st.session_state.ejercicio_actual['c']}"); calif = 0.0
             log = {"Nombre": nombre_user, "Nivel": nivel, "Calificación": calif, "Intentos": num_intentos + 1, "Rango": rango, "Fecha": datetime.datetime.now().strftime("%d/%m/%Y %H:%M")}
             st.session_state.db = pd.concat([st.session_state.db, pd.DataFrame([log])], ignore_index=True)
             st.session_state.ejercicio_actual = None
 
     with tabs[1]:
-        st.subheader("🎙️ Entrenamiento de Guion: Modelo B")
+        st.subheader("🎙️ Entrenamiento Modelo B")
         guion = st.text_area("Escribe tu llamada completa aquí:", height=300)
-        if st.button("Calificar Modelo B"):
+        if st.button("Calificar"):
             texto = guion.lower()
             pilares = {
-                "1. Presentación": ["hola", "buen", "día", "tarde", "noche", "nombre", "habla", "consubanco", "servidor"],
-                "2. Monto": ["$", "monto", "cantidad", "crédito", "70000", "70,000", "suma"],
-                "3. Plazo": ["meses", "plazo", "60", "sesenta", "pagar en"],
-                "4. Descuento": ["nómina", "descuento", "pensión", "directo", "automático", "retención"],
-                "5. Requisitos": ["ine", "identificación", "talón", "comprobante", "correo", "documentos", "whatsapp", "comparta"],
-                "6. Forma de Pago": ["saldos insolutos", "interés", "capital", "fijo", "descuento", "pago mensual", "cuenta", "disminuye"],
-                "7. Tiempo Depósito": ["depósito", "transferencia", "horas", "hrs", "días", "hábil", "disponible", "24", "72", "cuenta"],
-                "8. Cierre de Venta": ["trámite", "iniciar", "iniciemos", "comenzamos", "procedemos", "autoriza", "cerramos", "le parece bien", "disfrute", "proceso", "firma"]
+                "1. Presentación": ["hola", "buen", "día", "tarde", "noche", "nombre", "habla", "consubanco"],
+                "2. Monto": ["$", "monto", "cantidad", "crédito", "70000", "70,000"],
+                "3. Plazo": ["meses", "plazo", "60", "sesenta"],
+                "4. Descuento": ["nómina", "descuento", "pensión", "directo", "automático"],
+                "5. Requisitos": ["ine", "vigente", "correo", "sipre", "acceso", "whatsapp", "teléfono", "celular"],
+                "6. Forma de Pago": ["fijo", "descuento", "insolutos", "capital", "mensual"],
+                "7. Tiempo Depósito": ["depósito", "horas", "hrs", "24", "72", "cuenta"],
+                "8. Cierre de Venta": ["iniciar", "proceso", "procedemos", "autoriza", "le parece bien", "disfrute", "trámite"]
             }
             puntos = 0
             analisis = []
             for pilar, keys in pilares.items():
                 if any(k in texto for k in keys): analisis.append(f"✅ {pilar}"); puntos += 1
                 else: analisis.append(f"❌ {pilar}")
-            st.write("### Resultados")
-            c1, c2 = st.columns(2);
+            st.write("### Análisis de Estructura")
+            c1, c2 = st.columns(2)
             for i, res in enumerate(analisis):
                 if i < 4: c1.write(res)
                 else: c2.write(res)
@@ -133,29 +128,25 @@ else:
             if calif_rp == 10: st.balloons(); st.success(f"Calificación: {calif_rp}/10")
             else: st.warning(f"Calificación: {calif_rp}/10")
 
-    # --- NUEVA PESTAÑA DE INFOGRAFÍAS ---
     with tabs[2]:
-        st.subheader("📚 Infografías y Glosario Consubanco")
-        st.write("Consulta estos conceptos visuales para dominar tu discurso de venta.")
-        
-        col_info1, col_info2 = st.columns(2)
-        
-        with col_info1:
-            with st.expander("📊 1. El CAT (Costo Anual Total)"):
-                st.markdown("**¿Qué es?** Es un indicador que engloba todos los costos del crédito (tasa, seguros, comisiones).")
-                st.info("💡 *Tip de Venta:* Úsalo para comparar. En Consubanco, nuestro CAT es transparente y competitivo.")
-                
-            with st.expander("📉 2. Saldos Insolutos"):
-                st.markdown("**¿Qué es?** Es el método donde pagas intereses solo por lo que aún debes, no por el total inicial.")
-                st.success("✅ *Beneficio:* Permite que el cliente ahorre dinero si liquida antes de tiempo.")
-
-        with col_info2:
-            with st.expander("📅 3. Tasa Fija vs Variable"):
-                st.markdown("**Nuestra Tasa:** En Consubanco el pago es fijo durante toda la vida del crédito.")
-                st.warning("🔒 *Seguridad:* El pensionado nunca pagará un peso más de lo acordado inicialmente.")
-
-            with st.expander("📱 4. Requisitos de Expediente"):
-                st.markdown("1. **INE** (Vigente)\n2. **Último Talón** de Pago\n3. **Comprobante** de Domicilio\n4. **Estado de Cuenta**")
+        st.subheader("📚 Infografías de Apoyo")
+        c_i1, c_i2 = st.columns(2)
+        with c_i1:
+            with st.expander("✅ Requisitos de Contratación"):
+                st.markdown("""
+                Para iniciar el trámite solo necesitamos:
+                1. **INE Vigente.**
+                2. **Correo Electrónico** (con acceso a SIPRE).
+                3. **Teléfono** (con WhatsApp activo).
+                """)
+                st.info("💡 Tip: Verifica que el asesor tenga su contraseña de SIPRE a la mano.")
+            with st.expander("📊 El CAT"):
+                st.write("Engloba todos los costos. Es nuestra tasa real anual.")
+        with c_i2:
+            with st.expander("📉 Saldos Insolutos"):
+                st.write("El interés baja cada mes porque se calcula sobre lo que se debe.")
+            with st.expander("📅 Pago Fijo"):
+                st.write("La mensualidad nunca cambia, dando seguridad al pensionado.")
 
     with tabs[3]:
         st.dataframe(hist[["Fecha", "Nivel", "Calificación"]])
