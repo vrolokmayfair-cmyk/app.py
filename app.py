@@ -26,6 +26,10 @@ st.markdown(f"""
         background-color: white; box-shadow: 0px 4px 12px rgba(0,0,0,0.05);
         margin-bottom: 20px;
     }}
+    .info-card {{
+        background-color: white; padding: 15px; border-radius: 10px;
+        border-top: 4px solid {COLOR_AZUL}; margin-bottom: 10px;
+    }}
     h1, h2, h3 {{ color: {COLOR_AZUL}; font-family: 'Arial'; }}
     </style>
     """, unsafe_allow_html=True)
@@ -36,13 +40,11 @@ if 'db' not in st.session_state:
 if 'ejercicio_actual' not in st.session_state:
     st.session_state.ejercicio_actual = None
 
-# --- LÓGICA DE EJERCICIOS VARIADOS ---
 def generar_ejercicio(nivel):
     if nivel == "Básico":
         pago = random.randint(10, 30) * 100
         plazo = random.choice([12, 18, 24, 36])
         return {"p": f"PAGO TOTAL: El descuento mensual es de ${pago:,.0f} a un plazo de {plazo} meses. ¿Cuál es el Monto Total a pagar?", "c": str(pago * plazo)}
-    
     elif nivel == "Avanzado":
         opcion = random.choice(["interes", "cat", "insolutos", "tasa"])
         if opcion == "interes":
@@ -56,13 +58,11 @@ def generar_ejercicio(nivel):
         else:
             tasa_a = random.choice([48, 60, 72])
             return {"p": f"TASA MENSUAL: Si la Tasa Anual es del {tasa_a}%. ¿Cuál es la tasa mensual?", "c": str(tasa_a // 12)}
-            
     else: # Experto
         return {"p": "ESCENARIO: ¿Cuál es el principal beneficio de nuestro esquema de pagos para un cliente que quiere liquidar antes de tiempo?", "c": "ahorra intereses"}
 
 st.title("🏦 Academia de Ventas Consubanco")
 
-# --- BARRA LATERAL CON INSTRUCCIÓN CRÍTICA ---
 with st.sidebar:
     st.image("https://www.consubanco.com/assets/images/logo.svg", width=180)
     st.markdown("---")
@@ -72,12 +72,11 @@ with st.sidebar:
     nombre_user = st.text_input("NOMBRE DEL ASESOR:").strip().upper()
 
 if not nombre_user:
-    st.warning("⬅️ Por favor, ingresa tu nombre (Apellido Paterno Apellido Materno Nombres) en el panel lateral para comenzar.")
+    st.warning("⬅️ Por favor, ingresa tu nombre empezando por apellidos en el panel lateral.")
 else:
     hist = st.session_state.db[st.session_state.db["Nombre"] == nombre_user]
     num_intentos = len(hist)
     
-    # Lógica de niveles
     if num_intentos > 0 and hist.iloc[-1]["Calificación"] >= 10:
         ultimo_nv = hist.iloc[-1]["Nivel"]
         if ultimo_nv == "Básico": nivel, rango = "Avanzado", "Plata"
@@ -86,29 +85,21 @@ else:
     else:
         nivel, rango = "Básico", "Bronce"
 
-    st.markdown(f"""<div class='rango-box'>
-        <h2>{nombre_user}</h2>
-        <p><b>Rango:</b> {rango} | <b>Módulo:</b> {nivel}</p>
-    </div>""", unsafe_allow_html=True)
+    st.markdown(f"<div class='rango-box'><h2>{nombre_user}</h2><p><b>Rango:</b> {rango} | <b>Módulo:</b> {nivel}</p></div>", unsafe_allow_html=True)
 
-    tabs = st.tabs(["📝 Evaluación Mixta", "🎙️ Roleplay Modelo B", "📊 Evolución"])
+    tabs = st.tabs(["📝 Evaluación Mixta", "🎙️ Roleplay Modelo B", "📚 Biblioteca Visual", "📊 Evolución"])
 
     with tabs[0]:
         st.subheader(f"Desafío Nivel {nivel}")
         if st.button("Generar Nueva Pregunta") or st.session_state.ejercicio_actual is None:
             st.session_state.ejercicio_actual = generar_ejercicio(nivel)
-        
         st.info(st.session_state.ejercicio_actual["p"])
         resp_input = st.text_input("Tu respuesta:").strip().lower()
-        
         if st.button("Validar"):
             if resp_input == st.session_state.ejercicio_actual["c"]:
-                st.success("¡Excelente! Respuesta correcta.")
-                calif = 10.0
+                st.success("¡Excelente! Respuesta correcta."); calif = 10.0
             else:
-                st.error(f"Incorrecto. La respuesta era: {st.session_state.ejercicio_actual['c']}")
-                calif = 0.0
-            
+                st.error(f"Incorrecto. La respuesta era: {st.session_state.ejercicio_actual['c']}"); calif = 0.0
             log = {"Nombre": nombre_user, "Nivel": nivel, "Calificación": calif, "Intentos": num_intentos + 1, "Rango": rango, "Fecha": datetime.datetime.now().strftime("%d/%m/%Y %H:%M")}
             st.session_state.db = pd.concat([st.session_state.db, pd.DataFrame([log])], ignore_index=True)
             st.session_state.ejercicio_actual = None
@@ -131,21 +122,40 @@ else:
             puntos = 0
             analisis = []
             for pilar, keys in pilares.items():
-                if any(k in texto for k in keys):
-                    analisis.append(f"✅ {pilar}")
-                    puntos += 1
-                else:
-                    analisis.append(f"❌ {pilar}")
+                if any(k in texto for k in keys): analisis.append(f"✅ {pilar}"); puntos += 1
+                else: analisis.append(f"❌ {pilar}")
             st.write("### Resultados")
-            c1, c2 = st.columns(2)
+            c1, c2 = st.columns(2);
             for i, res in enumerate(analisis):
                 if i < 4: c1.write(res)
                 else: c2.write(res)
             calif_rp = (puntos / 8) * 10
-            if calif_rp == 10:
-                st.balloons(); st.success(f"Calificación: {calif_rp}/10")
-            else:
-                st.warning(f"Calificación: {calif_rp}/10")
+            if calif_rp == 10: st.balloons(); st.success(f"Calificación: {calif_rp}/10")
+            else: st.warning(f"Calificación: {calif_rp}/10")
 
+    # --- NUEVA PESTAÑA DE INFOGRAFÍAS ---
     with tabs[2]:
+        st.subheader("📚 Infografías y Glosario Consubanco")
+        st.write("Consulta estos conceptos visuales para dominar tu discurso de venta.")
+        
+        col_info1, col_info2 = st.columns(2)
+        
+        with col_info1:
+            with st.expander("📊 1. El CAT (Costo Anual Total)"):
+                st.markdown("**¿Qué es?** Es un indicador que engloba todos los costos del crédito (tasa, seguros, comisiones).")
+                st.info("💡 *Tip de Venta:* Úsalo para comparar. En Consubanco, nuestro CAT es transparente y competitivo.")
+                
+            with st.expander("📉 2. Saldos Insolutos"):
+                st.markdown("**¿Qué es?** Es el método donde pagas intereses solo por lo que aún debes, no por el total inicial.")
+                st.success("✅ *Beneficio:* Permite que el cliente ahorre dinero si liquida antes de tiempo.")
+
+        with col_info2:
+            with st.expander("📅 3. Tasa Fija vs Variable"):
+                st.markdown("**Nuestra Tasa:** En Consubanco el pago es fijo durante toda la vida del crédito.")
+                st.warning("🔒 *Seguridad:* El pensionado nunca pagará un peso más de lo acordado inicialmente.")
+
+            with st.expander("📱 4. Requisitos de Expediente"):
+                st.markdown("1. **INE** (Vigente)\n2. **Último Talón** de Pago\n3. **Comprobante** de Domicilio\n4. **Estado de Cuenta**")
+
+    with tabs[3]:
         st.dataframe(hist[["Fecha", "Nivel", "Calificación"]])
