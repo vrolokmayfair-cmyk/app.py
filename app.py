@@ -36,46 +36,48 @@ if 'db' not in st.session_state:
 if 'ejercicio_actual' not in st.session_state:
     st.session_state.ejercicio_actual = None
 
-# --- NUEVA LÓGICA DE EJERCICIOS VARIADOS ---
+# --- LÓGICA DE EJERCICIOS VARIADOS ---
 def generar_ejercicio(nivel):
     if nivel == "Básico":
         pago = random.randint(10, 30) * 100
         plazo = random.choice([12, 18, 24, 36])
-        return {"p": f"PAGO TOTAL: Si el descuento mensual es de ${pago:,.0f} a un plazo de {plazo} meses. ¿Cuál es el Monto Total a pagar?", "c": str(pago * plazo), "tipo": "num"}
+        return {"p": f"PAGO TOTAL: El descuento mensual es de ${pago:,.0f} a un plazo de {plazo} meses. ¿Cuál es el Monto Total a pagar?", "c": str(pago * plazo)}
     
     elif nivel == "Avanzado":
         opcion = random.choice(["interes", "cat", "insolutos", "tasa"])
-        
         if opcion == "interes":
             cap = random.randint(30, 60) * 1000
             total = cap * 1.5
-            return {"p": f"INTERÉS REAL: Un cliente recibe ${cap:,.0f} y al final paga ${total:,.0f}. ¿Cuánto pagó de PURO INTERÉS?", "c": str(int(total - cap)), "tipo": "num"}
-        
+            return {"p": f"INTERÉS REAL: Un cliente recibe ${cap:,.0f} y al final paga ${total:,.0f}. ¿Cuánto pagó de PURO INTERÉS?", "c": str(int(total - cap))}
         elif opcion == "cat":
-            return {"p": "¿Qué significan las siglas CAT en nuestros contratos? (Escríbelo completo)", "c": "costo anual total", "tipo": "text"}
-        
+            return {"p": "¿Qué significan las siglas CAT en nuestros contratos?", "c": "costo anual total"}
         elif opcion == "insolutos":
-            return {"p": "¿Cómo se llama el esquema donde el interés se calcula sobre lo que el cliente DEBE y no sobre el monto inicial?", "c": "saldos insolutos", "tipo": "text"}
-        
+            return {"p": "¿Cómo se llama el esquema donde el interés se calcula sobre el saldo pendiente y no sobre el monto inicial?", "c": "saldos insolutos"}
         else:
             tasa_a = random.choice([48, 60, 72])
-            return {"p": f"TASA MENSUAL: Si la Tasa Anual es del {tasa_a}%. ¿Cuál es la tasa mensual?", "c": str(tasa_a // 12), "tipo": "num"}
+            return {"p": f"TASA MENSUAL: Si la Tasa Anual es del {tasa_a}%. ¿Cuál es la tasa mensual?", "c": str(tasa_a // 12)}
             
     else: # Experto
-        return {"p": "ESCENARIO: Un cliente quiere liquidar antes de tiempo. ¿Por qué le conviene el esquema de Consubanco?", "c": "ahorra intereses", "tipo": "text"}
+        return {"p": "ESCENARIO: ¿Cuál es el principal beneficio de nuestro esquema de pagos para un cliente que quiere liquidar antes de tiempo?", "c": "ahorra intereses"}
 
 st.title("🏦 Academia de Ventas Consubanco")
 
+# --- BARRA LATERAL CON INSTRUCCIÓN CRÍTICA ---
 with st.sidebar:
     st.image("https://www.consubanco.com/assets/images/logo.svg", width=180)
+    st.markdown("---")
+    st.error("⚠️ **IMPORTANTE:**")
+    st.write("Escribe tu nombre empezando por **APELLIDOS**.")
+    st.caption("Ejemplo: PEREZ GARCIA JUAN")
     nombre_user = st.text_input("NOMBRE DEL ASESOR:").strip().upper()
 
 if not nombre_user:
-    st.warning("⬅️ Ingresa tu nombre para comenzar.")
+    st.warning("⬅️ Por favor, ingresa tu nombre (Apellido Paterno Apellido Materno Nombres) en el panel lateral para comenzar.")
 else:
     hist = st.session_state.db[st.session_state.db["Nombre"] == nombre_user]
     num_intentos = len(hist)
     
+    # Lógica de niveles
     if num_intentos > 0 and hist.iloc[-1]["Calificación"] >= 10:
         ultimo_nv = hist.iloc[-1]["Nivel"]
         if ultimo_nv == "Básico": nivel, rango = "Avanzado", "Plata"
@@ -84,7 +86,10 @@ else:
     else:
         nivel, rango = "Básico", "Bronce"
 
-    st.markdown(f"""<div class='rango-box'><h2>{nombre_user}</h2><p><b>Rango:</b> {rango} | <b>Módulo:</b> {nivel}</p></div>""", unsafe_allow_html=True)
+    st.markdown(f"""<div class='rango-box'>
+        <h2>{nombre_user}</h2>
+        <p><b>Rango:</b> {rango} | <b>Módulo:</b> {nivel}</p>
+    </div>""", unsafe_allow_html=True)
 
     tabs = st.tabs(["📝 Evaluación Mixta", "🎙️ Roleplay Modelo B", "📊 Evolución"])
 
@@ -94,14 +99,14 @@ else:
             st.session_state.ejercicio_actual = generar_ejercicio(nivel)
         
         st.info(st.session_state.ejercicio_actual["p"])
-        resp_input = st.text_input("Tu respuesta (sin símbolos ni puntos):").strip().lower()
+        resp_input = st.text_input("Tu respuesta:").strip().lower()
         
         if st.button("Validar"):
             if resp_input == st.session_state.ejercicio_actual["c"]:
                 st.success("¡Excelente! Respuesta correcta.")
                 calif = 10.0
             else:
-                st.error(f"Sigue practicando. La respuesta correcta era: {st.session_state.ejercicio_actual['c']}")
+                st.error(f"Incorrecto. La respuesta era: {st.session_state.ejercicio_actual['c']}")
                 calif = 0.0
             
             log = {"Nombre": nombre_user, "Nivel": nivel, "Calificación": calif, "Intentos": num_intentos + 1, "Rango": rango, "Fecha": datetime.datetime.now().strftime("%d/%m/%Y %H:%M")}
@@ -131,16 +136,16 @@ else:
                     puntos += 1
                 else:
                     analisis.append(f"❌ {pilar}")
-            st.write("### Resultados del Análisis")
+            st.write("### Resultados")
             c1, c2 = st.columns(2)
             for i, res in enumerate(analisis):
                 if i < 4: c1.write(res)
                 else: c2.write(res)
             calif_rp = (puntos / 8) * 10
             if calif_rp == 10:
-                st.balloons(); st.success(f"Calificación: {calif_rp}/10 - ¡Perfecto!")
+                st.balloons(); st.success(f"Calificación: {calif_rp}/10")
             else:
-                st.warning(f"Calificación: {calif_rp}/10 - Revisa los puntos faltantes.")
+                st.warning(f"Calificación: {calif_rp}/10")
 
     with tabs[2]:
         st.dataframe(hist[["Fecha", "Nivel", "Calificación"]])
