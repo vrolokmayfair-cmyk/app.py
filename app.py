@@ -36,18 +36,33 @@ if 'db' not in st.session_state:
 if 'ejercicio_actual' not in st.session_state:
     st.session_state.ejercicio_actual = None
 
+# --- NUEVA LÓGICA DE EJERCICIOS VARIADOS ---
 def generar_ejercicio(nivel):
     if nivel == "Básico":
         pago = random.randint(10, 30) * 100
         plazo = random.choice([12, 18, 24, 36])
-        return {"p": f"Pago mensual de ${pago:,.0f} a un plazo de {plazo} meses. ¿Monto Total?", "c": str(pago * plazo)}
+        return {"p": f"PAGO TOTAL: Si el descuento mensual es de ${pago:,.0f} a un plazo de {plazo} meses. ¿Cuál es el Monto Total a pagar?", "c": str(pago * plazo), "tipo": "num"}
+    
     elif nivel == "Avanzado":
-        cap = random.randint(20, 50) * 1000
-        interes = random.randint(10, 25) * 1000
-        return {"p": f"Capital de ${cap:,.0f} + Interés de ${interes:,.0f}. ¿Monto Total?", "c": str(cap + interes)}
-    else:
-        tasa_a = random.choice([36, 48, 60, 72])
-        return {"p": f"Tasa Anual del {tasa_a}%. ¿Tasa Mensual?", "c": str(tasa_a // 12)}
+        opcion = random.choice(["interes", "cat", "insolutos", "tasa"])
+        
+        if opcion == "interes":
+            cap = random.randint(30, 60) * 1000
+            total = cap * 1.5
+            return {"p": f"INTERÉS REAL: Un cliente recibe ${cap:,.0f} y al final paga ${total:,.0f}. ¿Cuánto pagó de PURO INTERÉS?", "c": str(int(total - cap)), "tipo": "num"}
+        
+        elif opcion == "cat":
+            return {"p": "¿Qué significan las siglas CAT en nuestros contratos? (Escríbelo completo)", "c": "costo anual total", "tipo": "text"}
+        
+        elif opcion == "insolutos":
+            return {"p": "¿Cómo se llama el esquema donde el interés se calcula sobre lo que el cliente DEBE y no sobre el monto inicial?", "c": "saldos insolutos", "tipo": "text"}
+        
+        else:
+            tasa_a = random.choice([48, 60, 72])
+            return {"p": f"TASA MENSUAL: Si la Tasa Anual es del {tasa_a}%. ¿Cuál es la tasa mensual?", "c": str(tasa_a // 12), "tipo": "num"}
+            
+    else: # Experto
+        return {"p": "ESCENARIO: Un cliente quiere liquidar antes de tiempo. ¿Por qué le conviene el esquema de Consubanco?", "c": "ahorra intereses", "tipo": "text"}
 
 st.title("🏦 Academia de Ventas Consubanco")
 
@@ -56,7 +71,7 @@ with st.sidebar:
     nombre_user = st.text_input("NOMBRE DEL ASESOR:").strip().upper()
 
 if not nombre_user:
-    st.warning("⬅️ Ingresa tu nombre en el panel lateral.")
+    st.warning("⬅️ Ingresa tu nombre para comenzar.")
 else:
     hist = st.session_state.db[st.session_state.db["Nombre"] == nombre_user]
     num_intentos = len(hist)
@@ -69,25 +84,26 @@ else:
     else:
         nivel, rango = "Básico", "Bronce"
 
-    st.markdown(f"""<div class='rango-box'>
-        <h2>{nombre_user}</h2>
-        <p><b>Rango Actual:</b> {rango} | <b>Nivel:</b> {nivel}</p>
-    </div>""", unsafe_allow_html=True)
+    st.markdown(f"""<div class='rango-box'><h2>{nombre_user}</h2><p><b>Rango:</b> {rango} | <b>Módulo:</b> {nivel}</p></div>""", unsafe_allow_html=True)
 
-    tabs = st.tabs(["📝 Examen", "🎙️ Roleplay Modelo B", "📊 Evolución"])
+    tabs = st.tabs(["📝 Evaluación Mixta", "🎙️ Roleplay Modelo B", "📊 Evolución"])
 
     with tabs[0]:
-        if st.button("Nuevo Ejercicio") or st.session_state.ejercicio_actual is None:
+        st.subheader(f"Desafío Nivel {nivel}")
+        if st.button("Generar Nueva Pregunta") or st.session_state.ejercicio_actual is None:
             st.session_state.ejercicio_actual = generar_ejercicio(nivel)
+        
         st.info(st.session_state.ejercicio_actual["p"])
-        resp_input = st.text_input("Resultado:")
+        resp_input = st.text_input("Tu respuesta (sin símbolos ni puntos):").strip().lower()
+        
         if st.button("Validar"):
             if resp_input == st.session_state.ejercicio_actual["c"]:
-                st.success("¡Correcto!")
+                st.success("¡Excelente! Respuesta correcta.")
                 calif = 10.0
             else:
-                st.error(f"Incorrecto. Era {st.session_state.ejercicio_actual['c']}")
+                st.error(f"Sigue practicando. La respuesta correcta era: {st.session_state.ejercicio_actual['c']}")
                 calif = 0.0
+            
             log = {"Nombre": nombre_user, "Nivel": nivel, "Calificación": calif, "Intentos": num_intentos + 1, "Rango": rango, "Fecha": datetime.datetime.now().strftime("%d/%m/%Y %H:%M")}
             st.session_state.db = pd.concat([st.session_state.db, pd.DataFrame([log])], ignore_index=True)
             st.session_state.ejercicio_actual = None
@@ -95,10 +111,8 @@ else:
     with tabs[1]:
         st.subheader("🎙️ Entrenamiento de Guion: Modelo B")
         guion = st.text_area("Escribe tu llamada completa aquí:", height=300)
-        
         if st.button("Calificar Modelo B"):
             texto = guion.lower()
-            # DICCIONARIO MEJORADO Y FLEXIBLE
             pilares = {
                 "1. Presentación": ["hola", "buen", "día", "tarde", "noche", "nombre", "habla", "consubanco", "servidor"],
                 "2. Monto": ["$", "monto", "cantidad", "crédito", "70000", "70,000", "suma"],
@@ -109,7 +123,6 @@ else:
                 "7. Tiempo Depósito": ["depósito", "transferencia", "horas", "hrs", "días", "hábil", "disponible", "24", "72", "cuenta"],
                 "8. Cierre de Venta": ["trámite", "iniciar", "iniciemos", "comenzamos", "procedemos", "autoriza", "cerramos", "le parece bien", "disfrute", "proceso", "firma"]
             }
-            
             puntos = 0
             analisis = []
             for pilar, keys in pilares.items():
@@ -118,17 +131,14 @@ else:
                     puntos += 1
                 else:
                     analisis.append(f"❌ {pilar}")
-            
             st.write("### Resultados del Análisis")
             c1, c2 = st.columns(2)
             for i, res in enumerate(analisis):
                 if i < 4: c1.write(res)
                 else: c2.write(res)
-            
             calif_rp = (puntos / 8) * 10
             if calif_rp == 10:
-                st.balloons()
-                st.success(f"Calificación: {calif_rp}/10 - ¡Perfecto!")
+                st.balloons(); st.success(f"Calificación: {calif_rp}/10 - ¡Perfecto!")
             else:
                 st.warning(f"Calificación: {calif_rp}/10 - Revisa los puntos faltantes.")
 
