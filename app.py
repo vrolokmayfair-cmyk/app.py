@@ -28,14 +28,13 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- INICIALIZACIÓN DE VARIABLES DE SESIÓN ---
+# --- INICIALIZACIÓN DE VARIABLES ---
 if 'db' not in st.session_state:
     st.session_state.db = pd.DataFrame(columns=["Nombre", "Nivel", "Calificación", "Intentos", "Rango", "Fecha"])
 
 if 'ejercicio_actual' not in st.session_state:
     st.session_state.ejercicio_actual = None
 
-# --- FUNCIONES DE LÓGICA ---
 def generar_nuevo_ejercicio(nivel):
     if nivel == "Básico":
         pago = random.randint(10, 30) * 100
@@ -62,13 +61,12 @@ def generar_nuevo_ejercicio(nivel):
 st.title("🏦 Academia de Ventas Consubanco")
 
 with st.sidebar:
-    st.image("https://www.consubanco.com/assets/images/logo.svg", width=200) # Logo genérico o link a logo real
+    st.image("https://www.consubanco.com/assets/images/logo.svg", width=200)
     nombre_usuario = st.text_input("NOMBRE DEL ASESOR:").strip().upper()
 
 if not nombre_usuario:
     st.warning("⚠️ Ingresa tu nombre en el panel lateral para activar la plataforma.")
 else:
-    # Determinación de Nivel y Rango
     historial = st.session_state.db[st.session_state.db["Nombre"] == nombre_usuario]
     intentos = len(historial)
     
@@ -82,86 +80,86 @@ else:
     st.markdown(f"""<div class='rango-box'>
         <span style='color: {COLOR_SECUNDARIO}; font-weight: bold;'>PERFIL DE ASESOR</span>
         <h2>{nombre_usuario}</h2>
-        <p><b>Rango:</b> {rango} | <b>Nivel de Evaluación:</b> {nivel}</p>
+        <p><b>Rango:</b> {rango} | <b>Nivel:</b> {nivel}</p>
     </div>""", unsafe_allow_html=True)
 
-    tabs = st.tabs(["📝 Evaluación Financiera", "🎙️ Simulador de Roleplay", "📈 Mi Progreso"])
+    tabs = st.tabs(["📝 Evaluación Financiera", "🎙️ Simulador Roleplay (Modelo B)", "📈 Mi Progreso"])
 
     # --- TAB 1: EXAMEN ---
     with tabs[0]:
-        st.subheader("Cálculos Financieros Rápidos")
-        
+        st.subheader("Cálculos Financieros")
         if st.button("Generar Ejercicio Nuevo") or st.session_state.ejercicio_actual is None:
             generar_nuevo_ejercicio(nivel)
         
         st.info(st.session_state.ejercicio_actual["p"])
-        
-        resp_user = st.text_input("Escribe el resultado (solo números):", key="resp_ej")
+        resp_user = st.text_input("Escribe el resultado (solo números):")
         
         if st.button("Validar Respuesta"):
             if resp_user == st.session_state.ejercicio_actual["c"]:
-                st.success("✅ ¡Correcto! Has demostrado precisión en el cálculo.")
+                st.success("✅ ¡Correcto!")
                 calif = 10.0
             else:
-                st.error(f"❌ Incorrecto. El resultado correcto era: {st.session_state.ejercicio_actual['c']}")
+                st.error(f"❌ Incorrecto. Era: {st.session_state.ejercicio_actual['c']}")
                 calif = 0.0
             
-            # Guardar en Historial
             nuevo_log = {
                 "Nombre": nombre_usuario, "Nivel": nivel, "Calificación": calif,
                 "Intentos": intentos + 1, "Rango": rango, "Fecha": datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
             }
             st.session_state.db = pd.concat([st.session_state.db, pd.DataFrame([nuevo_log])], ignore_index=True)
-            st.session_state.ejercicio_actual = None # Reset para el siguiente
+            st.session_state.ejercicio_actual = None
 
-    # --- TAB 2: ROLEPLAY ---
+    # --- TAB 2: ROLEPLAY MODELO B ---
     with tabs[1]:
-        st.subheader("Módulo de Cierre de Venta")
-        st.write("Simulación: El cliente acepta las condiciones, procede a realizar el cierre siguiendo la estructura oficial.")
+        st.subheader("🎙️ Entrenamiento de Guion: Modelo B")
+        st.markdown("""
+        **Instrucciones:** Redacta la llamada completa siguiendo la estructura de **Modelo B**. 
+        Tu guion debe incluir obligatoriamente los 8 pilares de la venta para ser aprobado.
+        """)
         
-        respuesta_rp = st.text_area("Ingresa tu respuesta de venta:", height=250, placeholder="Ej: Hola, soy Juan de Consubanco...")
+        respuesta_rp = st.text_area("Escribe tu modelo de llamada aquí:", height=300, 
+                                   placeholder="Ej: Buen día, le habla [Nombre] de Consubanco. El motivo de mi llamada es...")
         
-        if st.button("Evaluar Mi Venta"):
-            # Diccionario robusto de validación
+        if st.button("Calificar Modelo B"):
             puntos_clave = {
-                "Presentación": ["hola", "buen", "tarde", "noche", "nombre", "consubanco"],
-                "Monto": ["monto", "cantidad", "pesos", "$"],
-                "Plazo": ["meses", "plazo", "tiempo", "periodo"],
-                "Descuento": ["nómina", "descuento", "automático", "pago"],
-                "Requisitos": ["ine", "identificación", "talón", "comprobante", "documentos"],
-                "Forma de Pago": ["saldos insolutos", "interés", "capital", "fijo"],
-                "Tiempo Depósito": ["depósito", "horas", "días", "transferencia", "disponible"],
-                "Cierre de Venta": ["parece bien", "comenzamos", "procedemos", "autoriza", "firme", "trámite", "cerramos", "beneficiario"]
+                "1. Presentación": ["hola", "buen", "día", "tarde", "noche", "nombre", "consubanco", "habla"],
+                "2. Monto": ["monto", "cantidad", "pesos", "$", "ofrecer", "línea"],
+                "3. Plazo": ["meses", "plazo", "tiempo", "periodo", "mensualidades"],
+                "4. Descuento": ["nómina", "descuento", "automático", "pago", "directo"],
+                "5. Requisitos": ["ine", "identificación", "talón", "comprobante", "documentos", "requisitos"],
+                "6. Forma de Pago": ["saldos insolutos", "interés", "capital", "fijo", "disminuye"],
+                "7. Tiempo Depósito": ["depósito", "horas", "días", "transferencia", "disponible", "rápido"],
+                "8. Cierre de Venta": ["parece bien", "comenzamos", "procedemos", "autoriza", "firme", "trámite", "cerramos", "beneficiario", "acuerdo"]
             }
             
             validos = 0
             resumen = []
             for punto, keywords in puntos_clave.items():
                 if any(k in respuesta_rp.lower() for k in keywords):
-                    resumen.append(f"✅ **{punto}**: Detectado")
+                    resumen.append(f"✅ **{punto}**")
                     validos += 1
                 else:
-                    resumen.append(f"❌ **{punto}**: No detectado")
+                    resumen.append(f"❌ **{punto}**")
             
-            st.write("### Resultados del Análisis")
+            st.write("### Validación de Estructura Modelo B")
             c1, c2 = st.columns(2)
             for i, item in enumerate(resumen):
                 if i < 4: c1.write(item)
                 else: c2.write(item)
             
             calif_rp = (validos / 8) * 10
-            if calif_rp >= 8.5:
+            if calif_rp == 10:
                 st.balloons()
-                st.success(f"Puntaje de Roleplay: {calif_rp}/10 - ¡Excelente manejo de guion!")
+                st.success("¡Felicidades! Has cumplido con el Modelo B a la perfección.")
+            elif calif_rp >= 7:
+                st.warning(f"Calificación: {calif_rp}/10. Revisa los puntos faltantes para alcanzar la excelencia.")
             else:
-                st.warning(f"Puntaje: {calif_rp}/10 - Te faltaron puntos clave. Revisa los elementos marcados con ❌.")
+                st.error(f"Calificación: {calif_rp}/10. Es necesario incluir todos los elementos de la estructura.")
 
     # --- TAB 3: PROGRESO ---
     with tabs[2]:
-        st.subheader("Tu Evolución en Consubanco")
+        st.subheader("Tu Evolución")
         if not historial.empty:
             st.table(historial[["Fecha", "Nivel", "Rango", "Calificación"]])
-            csv = historial.to_csv(index=False).encode('utf-8')
-            st.download_button("📥 Descargar mi Reporte Académico", csv, f"Reporte_{nombre_usuario}.csv", "text/csv")
         else:
-            st.info("Realiza tu primera evaluación para ver estadísticas.")
+            st.info("Aún no hay datos. Realiza tu primera evaluación.")
