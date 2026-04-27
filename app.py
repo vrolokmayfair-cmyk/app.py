@@ -79,7 +79,7 @@ else:
     hist = st.session_state.db[st.session_state.db["Nombre"] == nombre_user]
     num_intentos = len(hist)
     
-    # Lógica de niveles
+    # Lógica de niveles y rangos
     if num_intentos > 0 and hist.iloc[-1]["Calificación"] >= 10:
         ultimo_nv = hist.iloc[-1]["Nivel"]
         if ultimo_nv == "Básico": nivel, rango = "Avanzado", "Plata"
@@ -90,7 +90,7 @@ else:
 
     st.markdown(f"<div class='rango-box'><h2>{nombre_user}</h2><p><b>Rango:</b> {rango} | <b>Módulo:</b> {nivel}</p></div>", unsafe_allow_html=True)
 
-    tabs = st.tabs(["📝 Evaluación", "🎙️ Roleplay Modelo B", "📚 Glosario Visual", "📊 Evolución"])
+    tabs = st.tabs(["📝 Evaluación", "🎙️ Roleplay Modelo B", "📚 Glosario e Infografías", "📊 Evolución"])
 
     with tabs[0]:
         if st.button("Nueva Pregunta") or st.session_state.ejercicio_actual is None:
@@ -125,60 +125,4 @@ else:
             puntos = 0
             analisis = []
             for pilar, keys in pilares.items():
-                if any(k in texto for k in keys): analisis.append(f"✅ {pilar}"); puntos += 1
-                else: analisis.append(f"❌ {pilar}")
-            st.write("### Análisis de Estructura")
-            c1, c2 = st.columns(2)
-            for i, res in enumerate(analisis):
-                if i < 4: c1.write(res)
-                else: c2.write(res)
-            calif_rp = (puntos / 8) * 10
-            if calif_rp == 10: st.balloons(); st.success(f"Calificación: {calif_rp}/10")
-            else: st.warning(f"Calificación: {calif_rp}/10")
-
-    with tabs[2]:
-        st.subheader("📚 Biblioteca Visual: Conceptos Clave")
-        
-        # FILA 1: Conceptos Generales
-        c1, c2 = st.columns(2)
-        with c1:
-            with st.expander("📌 Capital Financiero"):
-                st.video("176865.mp4")
-                st.write("**Definición:** Es la suma inicial de dinero prestada, sin contar los intereses.")
-            
-            with st.expander("📊 El CAT (Costo Anual Total)"):
-                st.video("176862.mp4")
-                st.write("**Definición:** Indicador que suma la tasa, seguros y comisiones para dar el costo real anual.")
-
-        with c2:
-            with st.expander("📉 Tasa Variable"):
-                st.video("176864.mp4")
-                st.write("**Definición:** Significa que el pago mensual puede cambiar a lo largo del tiempo.")
-            
-            with st.expander("🔒 Tasa Fija (El modelo Consubanco)"):
-                st.video("176863.mp4")
-                st.write("**Definición:** Un porcentaje que no cambia durante todo el plazo del crédito.")
-                st.success("✅ **Ventaja CSB:** El pensionado siempre paga lo mismo, protegiéndolo de la inflación.")
-
-        # FILA 2: Otros conceptos
-        st.markdown("---")
-        c3, c4 = st.columns(2)
-        with c3:
-            with st.expander("📌 Interés Ordinario y Amortización"):
-                st.write("**Interés Ordinario:** Costo pactado por el uso del dinero.")
-                st.write("**Tabla de Amortización:** Detalle de pagos de principio a fin.")
-        with c4:
-            with st.expander("📋 Requisitos de Expediente"):
-                st.markdown("- **INE Vigente**\n- **Correo con acceso a SIPRE**\n- **WhatsApp activo**")
-
-    with tabs[3]:
-        st.subheader("📊 Historial y Control")
-        if not hist.empty:
-            st.dataframe(hist[["Fecha", "Nivel", "Calificación"]], use_container_width=True)
-        
-        if is_admin:
-            st.markdown("---")
-            st.subheader("🔓 Panel Maestro (Solo Admin)")
-            if not st.session_state.db.empty:
-                csv = st.session_state.db.to_csv(index=False).encode('utf-8')
-                st.download_button("📥 DESCARGAR REPORTE GENERAL", data=csv, file_name="Reporte_Academia.csv", mime="text/csv", key="admin_dl")
+                if any(k in texto for k in keys): analisis.append(f"
