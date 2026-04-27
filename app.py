@@ -79,7 +79,7 @@ else:
     hist = st.session_state.db[st.session_state.db["Nombre"] == nombre_user]
     num_intentos = len(hist)
     
-    # Lógica de niveles y rangos
+    # Lógica de niveles
     if num_intentos > 0 and hist.iloc[-1]["Calificación"] >= 10:
         ultimo_nv = hist.iloc[-1]["Nivel"]
         if ultimo_nv == "Básico": nivel, rango = "Avanzado", "Plata"
@@ -125,4 +125,56 @@ else:
             puntos = 0
             analisis = []
             for pilar, keys in pilares.items():
-                if any(k in texto for k in keys): analisis.append(f"
+                if any(k in texto for k in keys): analisis.append(f"✅ {pilar}"); puntos += 1
+                else: analisis.append(f"❌ {pilar}")
+            st.write("### Análisis de Estructura")
+            c1, c2 = st.columns(2)
+            for i, res in enumerate(analisis):
+                if i < 4: c1.write(res)
+                else: c2.write(res)
+            calif_rp = (puntos / 8) * 10
+            if calif_rp == 10: st.balloons(); st.success(f"Calificación: {calif_rp}/10")
+            else: st.warning(f"Calificación: {calif_rp}/10")
+
+    with tabs[2]:
+        st.subheader("📚 Conceptos Clave y Ventajas Consubanco")
+        c1, c2 = st.columns(2)
+        with c1:
+            with st.expander("📌 Interés Ordinario"):
+                st.write("**Definición:** Es el costo pactado por el uso del dinero prestado.")
+            with st.expander("📌 Tabla de Amortización"):
+                st.write("**Definición:** Documento que desglosa capital, intereses y seguros.")
+            with st.expander("📌 Saldos Insolutos"):
+                st.write("**Definición:** Interés cobrado sobre el saldo pendiente actual.")
+        with c2:
+            with st.expander("⚠️ Interés Compuesto"):
+                st.error("🔒 **Seguridad CSB:** Cero riesgo de interés compuesto por Tasa Fija.")
+            with st.expander("📊 CAT"):
+                st.write("**Definición:** Costo total anual (tasa + seguros + comisiones).")
+            with st.expander("📋 Requisitos"):
+                st.markdown("- **INE Vigente**\n- **Correo con acceso a SIPRE**\n- **WhatsApp activo**")
+
+    with tabs[3]:
+        # Sección del Asesor
+        st.subheader("📊 Tu Historial Personal")
+        if not hist.empty:
+            st.dataframe(hist[["Fecha", "Nivel", "Calificación"]], use_container_width=True)
+        else:
+            st.info("Aún no tienes evaluaciones registradas en esta sesión.")
+        
+        # Sección exclusiva del Admin (Independiente del historial del asesor)
+        if is_admin:
+            st.markdown("---")
+            st.subheader("🔓 Panel de Control Maestro (Admin)")
+            if not st.session_state.db.empty:
+                st.write("Registros totales en el sistema:", len(st.session_state.db))
+                csv = st.session_state.db.to_csv(index=False).encode('utf-8')
+                st.download_button(
+                    label="📥 DESCARGAR REPORTE GENERAL (CSV)",
+                    data=csv,
+                    file_name=f"Base_Datos_Academia_{datetime.datetime.now().strftime('%d_%m_%Y')}.csv",
+                    mime="text/csv",
+                    key="btn_descarga_admin"
+                )
+            else:
+                st.warning("La base de datos global está vacía. Nadie ha hecho evaluaciones todavía.")
