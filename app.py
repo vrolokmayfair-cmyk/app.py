@@ -90,7 +90,7 @@ else:
 
     st.markdown(f"<div class='rango-box'><h2>{nombre_user}</h2><p><b>Rango:</b> {rango} | <b>Módulo:</b> {nivel}</p></div>", unsafe_allow_html=True)
 
-    tabs = st.tabs(["📝 Evaluación", "🎙️ Roleplay Modelo B", "📚 Glosario e Infografías", "📊 Evolución"])
+    tabs = st.tabs(["📝 Evaluación", "🎙️ Roleplay Modelo B", "📚 Glosario Visual", "📊 Evolución"])
 
     with tabs[0]:
         if st.button("Nueva Pregunta") or st.session_state.ejercicio_actual is None:
@@ -137,44 +137,48 @@ else:
             else: st.warning(f"Calificación: {calif_rp}/10")
 
     with tabs[2]:
-        st.subheader("📚 Conceptos Clave y Ventajas Consubanco")
+        st.subheader("📚 Biblioteca Visual: Conceptos Clave")
+        
+        # FILA 1: Conceptos Generales
         c1, c2 = st.columns(2)
         with c1:
-            with st.expander("📌 Interés Ordinario"):
-                st.write("**Definición:** Es el costo pactado por el uso del dinero prestado.")
-            with st.expander("📌 Tabla de Amortización"):
-                st.write("**Definición:** Documento que desglosa capital, intereses y seguros.")
-            with st.expander("📌 Saldos Insolutos"):
-                st.write("**Definición:** Interés cobrado sobre el saldo pendiente actual.")
+            with st.expander("📌 Capital Financiero"):
+                st.video("176865.mp4")
+                st.write("**Definición:** Es la suma inicial de dinero prestada, sin contar los intereses.")
+            
+            with st.expander("📊 El CAT (Costo Anual Total)"):
+                st.video("176862.mp4")
+                st.write("**Definición:** Indicador que suma la tasa, seguros y comisiones para dar el costo real anual.")
+
         with c2:
-            with st.expander("⚠️ Interés Compuesto"):
-                st.error("🔒 **Seguridad CSB:** Cero riesgo de interés compuesto por Tasa Fija.")
-            with st.expander("📊 CAT"):
-                st.write("**Definición:** Costo total anual (tasa + seguros + comisiones).")
-            with st.expander("📋 Requisitos"):
+            with st.expander("📉 Tasa Variable"):
+                st.video("176864.mp4")
+                st.write("**Definición:** Significa que el pago mensual puede cambiar a lo largo del tiempo.")
+            
+            with st.expander("🔒 Tasa Fija (El modelo Consubanco)"):
+                st.video("176863.mp4")
+                st.write("**Definición:** Un porcentaje que no cambia durante todo el plazo del crédito.")
+                st.success("✅ **Ventaja CSB:** El pensionado siempre paga lo mismo, protegiéndolo de la inflación.")
+
+        # FILA 2: Otros conceptos
+        st.markdown("---")
+        c3, c4 = st.columns(2)
+        with c3:
+            with st.expander("📌 Interés Ordinario y Amortización"):
+                st.write("**Interés Ordinario:** Costo pactado por el uso del dinero.")
+                st.write("**Tabla de Amortización:** Detalle de pagos de principio a fin.")
+        with c4:
+            with st.expander("📋 Requisitos de Expediente"):
                 st.markdown("- **INE Vigente**\n- **Correo con acceso a SIPRE**\n- **WhatsApp activo**")
 
     with tabs[3]:
-        # Sección del Asesor
-        st.subheader("📊 Tu Historial Personal")
+        st.subheader("📊 Historial y Control")
         if not hist.empty:
             st.dataframe(hist[["Fecha", "Nivel", "Calificación"]], use_container_width=True)
-        else:
-            st.info("Aún no tienes evaluaciones registradas en esta sesión.")
         
-        # Sección exclusiva del Admin (Independiente del historial del asesor)
         if is_admin:
             st.markdown("---")
-            st.subheader("🔓 Panel de Control Maestro (Admin)")
+            st.subheader("🔓 Panel Maestro (Solo Admin)")
             if not st.session_state.db.empty:
-                st.write("Registros totales en el sistema:", len(st.session_state.db))
                 csv = st.session_state.db.to_csv(index=False).encode('utf-8')
-                st.download_button(
-                    label="📥 DESCARGAR REPORTE GENERAL (CSV)",
-                    data=csv,
-                    file_name=f"Base_Datos_Academia_{datetime.datetime.now().strftime('%d_%m_%Y')}.csv",
-                    mime="text/csv",
-                    key="btn_descarga_admin"
-                )
-            else:
-                st.warning("La base de datos global está vacía. Nadie ha hecho evaluaciones todavía.")
+                st.download_button("📥 DESCARGAR REPORTE GENERAL", data=csv, file_name="Reporte_Academia.csv", mime="text/csv", key="admin_dl")
