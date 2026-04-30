@@ -151,7 +151,7 @@ else:
     with tabs[3]:
         st.subheader("🕹️ Zona de Gamificación para Formación")
         
-        juego = st.radio("Selecciona una actividad:", ["Sopa de Letras", "Ahorcado", "Orden del Proceso"])
+        juego = st.radio("Selecciona una actividad:", ["Sopa de Letras (15x15)", "Ahorcado Técnico", "Orden del Proceso"])
         
         if juego == "Sopa de Letras (15x15)":
             st.write("🔍 **Encuentra las palabras:** CAT, SIPRE, INSOLUTOS, NOMINA, PENSIONADO")
