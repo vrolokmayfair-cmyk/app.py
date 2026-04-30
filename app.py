@@ -57,6 +57,30 @@ if 'db' not in st.session_state:
 if 'ejercicio_actual' not in st.session_state:
     st.session_state.ejercicio_actual = None
 
+# --- LÓGICA DE EVALUACIÓN (REINTEGRADA) ---
+def generar_ejercicio(nivel):
+    if nivel == "Básico":
+        pago = random.randint(15, 45) * 100
+        plazo = random.choice([12, 24, 36, 48, 60])
+        return {
+            "p": f"CÁLCULO RÁPIDO: Si un cliente tiene un descuento mensual de ${pago:,.0f} a un plazo de {plazo} meses, ¿cuál es el Monto Total que pagará al final del crédito?",
+            "c": str(pago * plazo)
+        }
+    elif nivel == "Avanzado":
+        opciones = [
+            {"p": "¿Qué concepto define el costo total del crédito expresado en términos porcentuales anuales?", "c": "cat"},
+            {"p": "¿Cómo se llama el esquema donde los intereses se calculan sobre lo que el cliente aún debe?", "c": "saldos insolutos"},
+            {"p": "¿Qué documento es vital entregar para que el cliente vea el desglose de sus pagos?", "c": "tabla de amortización"}
+        ]
+        return random.choice(opciones)
+    else: # Experto
+        opciones = [
+            {"p": "¿Por qué la Tasa Fija es un argumento de venta superior ante la inflación?", "c": "seguridad"},
+            {"p": "Verdadero o Falso: ¿Consubanco aplica interés compuesto en sus créditos de nómina?", "c": "falso"},
+            {"p": "¿Cuál es la herramienta principal para validar la capacidad de descuento de un pensionado IMSS?", "c": "sipre"}
+        ]
+        return random.choice(opciones)
+
 # --- FUNCIONES DE JUEGOS ---
 def generar_sopa_letras(palabras, tamaño=12):
     grid = [[random.choice(string.ascii_uppercase) for _ in range(tamaño)] for _ in range(tamaño)]
@@ -95,7 +119,6 @@ with st.sidebar:
 if not nombre_raw:
     st.warning("⬅️ Ingresa tu nombre (APELLIDOS PRIMERO) para comenzar.")
 else:
-    # Lógica Instructor
     es_instructor = (nombre_raw == MI_NOMBRE_CONTROL)
     if es_instructor and 'limpieza_hecha' not in st.session_state:
         st.session_state.db = st.session_state.db[st.session_state.db["Nombre"] != MI_NOMBRE_CONTROL]
@@ -113,6 +136,45 @@ else:
     st.markdown(f"<div class='rango-box'><h2>{nombre_raw}</h2><p><b>Rango:</b> {rango} | <b>Módulo:</b> {nivel}</p></div>", unsafe_allow_html=True)
 
     tabs = st.tabs(["📝 Evaluación", "🎙️ Roleplay", "📚 Glosario e Infografías", "🕹️ Centro de Juegos", "📊 Evolución"])
+
+    # --- TAB EVALUACIÓN (RESTABLECIDO) ---
+    with tabs[0]:
+        st.subheader("Módulo de Evaluación Dinámica")
+        if st.button("Generar Nueva Pregunta") or st.session_state.ejercicio_actual is None:
+            st.session_state.ejercicio_actual = generar_ejercicio(nivel)
+        
+        st.info(st.session_state.ejercicio_actual["p"])
+        resp = st.text_input("Escribe tu respuesta aquí:", key="eval_ans").strip().lower()
+        
+        if st.button("Validar y Guardar"):
+            if resp == st.session_state.ejercicio_actual["c"]:
+                st.success("¡Correcto! +10 puntos.")
+                calif = 10.0
+            else:
+                st.error(f"Incorrecto. La respuesta era: {st.session_state.ejercicio_actual['c']}")
+                calif = 0.0
+            
+            log = {
+                "Nombre": nombre_raw, "Nivel": nivel, "Calificación": calif, 
+                "Intentos": num_intentos + 1, "Rango": rango, 
+                "Fecha": datetime.datetime.now().strftime("%d/%m/%Y %H:%M")
+            }
+            st.session_state.db = pd.concat([st.session_state.db, pd.DataFrame([log])], ignore_index=True)
+            guardar_datos(st.session_state.db)
+            st.session_state.ejercicio_actual = None # Forzar nueva pregunta
+            st.rerun()
+
+    # --- TAB ROLEPLAY ---
+    with tabs[1]:
+        st.subheader("🎙️ Entrenamiento de Speech")
+        guion = st.text_area("Pega aquí tu speech de venta o cierre:", height=200)
+        if st.button("Analizar Estructura"):
+            puntos = 0
+            texto = guion.lower()
+            if any(x in texto for x in ["hola", "buen día"]): puntos += 3
+            if any(x in texto for x in ["monto", "plazo", "pago"]): puntos += 4
+            if any(x in texto for x in ["consubanco", "beneficio"]): puntos += 3
+            st.metric("Calidad del Speech", f"{puntos}/10")
 
     # --- TAB GLOSARIO COMPLETO ---
     with tabs[2]:
@@ -132,12 +194,9 @@ else:
             with st.expander("📌 Tasa de Interés"):
                 st.write("**Definición:** Costo del dinero prestado.")
                 st.success("✅ Tasa fija: El descuento no cambia nunca.")
-            with st.expander("📌 Tabla de Amortización"):
-                st.write("Documento que detalla cada pago. Transparencia desde el día 1.")
         with c2:
             with st.expander("📋 Requisitos"):
                 st.markdown("- **INE Vigente**\n- **Correo con acceso a SIPRE**\n- **WhatsApp activo**")
-                st.info("💡 **Tip:** Valida esto antes de iniciar para no perder la venta.")
             with st.expander("📌 Saldos Insolutos"):
                 st.write("Interés sobre el saldo pendiente. Beneficia la liquidación anticipada.")
             with st.expander("⚠️ Interés Compuesto"):
@@ -145,7 +204,7 @@ else:
             with st.expander("📌 SIPRE"):
                 st.write("Sistema de consulta para la capacidad de pago (IMSS).")
 
-    # --- TAB JUEGOS (SOLO SOPA Y AHORCADO) ---
+    # --- TAB JUEGOS ---
     with tabs[3]:
         st.subheader("🕹️ Centro de Entrenamiento")
         op_juego = st.radio("Selecciona actividad:", ["Sopa de Letras", "Ahorcado"])
