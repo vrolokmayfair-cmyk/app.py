@@ -154,10 +154,21 @@ else:
 
     with tabs[2]:
         st.subheader("📖 Material de Apoyo Interactivo")
-        # --- INTEGRACIÓN DE CANVA ---
-        # El enlace de edición se convierte en enlace de visualización (view?embed)
-        canva_url = "https://www.canva.com/design/DAHA28GoS8E/4gQn7nxFU_eDZx6KMy5ylQ/view?embed"
-        components.iframe(canva_url, height=500, scrolling=True)
+        
+        # --- CONTROL DE ACCESO A LA PRESENTACIÓN ---
+        st.write("Para visualizar el material exclusivo, ingresa la clave autorizada:")
+        clave_material = st.text_input("Clave de Acceso Material:", type="password", key="pass_canva")
+        
+        # Puedes cambiar 'CANVA2026' por la clave que prefieras
+        if clave_material == "CANVA2026":
+            st.success("Acceso concedido al material de apoyo.")
+            canva_url = "https://www.canva.com/design/DAHA28GoS8E/4gQn7nxFU_eDZx6KMy5ylQ/view?embed"
+            components.iframe(canva_url, height=500, scrolling=True)
+        else:
+            if clave_material:
+                st.error("Clave incorrecta. Solicita acceso a tu instructor.")
+            else:
+                st.info("🔒 Contenido bloqueado. Ingresa la clave para desbloquear.")
         
         st.markdown("---")
         st.subheader("📚 Conceptos Clave y Ventajas Consubanco")
