@@ -3,6 +3,7 @@ import pandas as pd
 import random
 import datetime
 import string
+import streamlit.components.v1 as components
 
 # --- CONFIGURACIÓN DE PÁGINA ---
 st.set_page_config(page_title="Academia Consubanco", layout="wide", page_icon="🏦")
@@ -152,6 +153,13 @@ else:
             else: st.warning(f"Calificación: {calif_rp}/10")
 
     with tabs[2]:
+        st.subheader("📖 Material de Apoyo Interactivo")
+        # --- INTEGRACIÓN DE CANVA ---
+        # El enlace de edición se convierte en enlace de visualización (view?embed)
+        canva_url = "https://www.canva.com/design/DAHA28GoS8E/4gQn7nxFU_eDZx6KMy5ylQ/view?embed"
+        components.iframe(canva_url, height=500, scrolling=True)
+        
+        st.markdown("---")
         st.subheader("📚 Conceptos Clave y Ventajas Consubanco")
         c1, c2 = st.columns(2)
         with c1:
