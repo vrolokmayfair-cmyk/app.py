@@ -65,7 +65,7 @@ def generar_sopa_letras(palabras, tamaño=12):
         colocada = False
         intentos = 0
         while not colocada and intentos < 100:
-            direccion = random.choice([(0,1), (1,0)]) # Horizontal o Vertical
+            direccion = random.choice([(0,1), (1,0)])
             fila = random.randint(0, tamaño - 1 if direccion == (0,1) else tamaño - len(palabra))
             col = random.randint(0, tamaño - len(palabra) if direccion == (0,1) else tamaño - 1)
             puedo = True
@@ -114,7 +114,7 @@ else:
 
     tabs = st.tabs(["📝 Evaluación", "🎙️ Roleplay", "📚 Glosario e Infografías", "🕹️ Centro de Juegos", "📊 Evolución"])
 
-    # --- TAB GLOSARIO (CON CAPITAL, CAT, TASA, REQUISITOS) ---
+    # --- TAB GLOSARIO COMPLETO ---
     with tabs[2]:
         if is_admin:
             components.iframe("https://www.canva.com/design/DAHA28GoS8E/4gQn7nxFU_eDZx6KMy5ylQ/view?embed", height=500)
@@ -128,52 +128,49 @@ else:
                 st.info("💡 **Tip:** El pago a capital reduce la deuda real mes con mes.")
             with st.expander("📌 CAT"):
                 st.write("**Definición:** Costo Anual Total (incluye seguros y comisiones).")
-                st.info("💡 **Tip:** Úsalo para demostrar transparencia absoluta.")
-        with c2:
-            with st.expander("📋 Requisitos"):
-                st.write("- INE Vigente, Correo/SIPRE y WhatsApp.")
+                st.info("💡 **Tip:** Transparencia absoluta para cerrar la venta.")
             with st.expander("📌 Tasa de Interés"):
                 st.write("**Definición:** Costo del dinero prestado.")
-                st.success("✅ Tasa fija: seguridad total para el pensionado.")
+                st.success("✅ Tasa fija: El descuento no cambia nunca.")
+            with st.expander("📌 Tabla de Amortización"):
+                st.write("Documento que detalla cada pago. Transparencia desde el día 1.")
+        with c2:
+            with st.expander("📋 Requisitos"):
+                st.markdown("- **INE Vigente**\n- **Correo con acceso a SIPRE**\n- **WhatsApp activo**")
+                st.info("💡 **Tip:** Valida esto antes de iniciar para no perder la venta.")
+            with st.expander("📌 Saldos Insolutos"):
+                st.write("Interés sobre el saldo pendiente. Beneficia la liquidación anticipada.")
+            with st.expander("⚠️ Interés Compuesto"):
+                st.error("🔒 En Consubanco NO se cobran intereses sobre intereses.")
+            with st.expander("📌 SIPRE"):
+                st.write("Sistema de consulta para la capacidad de pago (IMSS).")
 
-    # --- TAB JUEGOS (AHORA CON INSTRUCCIONES Y LISTA) ---
+    # --- TAB JUEGOS (SOLO SOPA Y AHORCADO) ---
     with tabs[3]:
         st.subheader("🕹️ Centro de Entrenamiento")
-        op_juego = st.radio("Selecciona actividad:", ["Sopa de Letras", "Ahorcado", "Orden del Proceso"])
+        op_juego = st.radio("Selecciona actividad:", ["Sopa de Letras", "Ahorcado"])
         
         if op_juego == "Sopa de Letras":
-            st.markdown("""
-            ### 🔍 Instrucciones:
-            Encuentra las palabras clave de Consubanco ocultas en la cuadrícula. 
-            Pueden estar en forma **Horizontal** o **Vertical**.
-            """)
-            
+            st.markdown("### 🔍 Instrucciones:\nBusca las palabras en horizontal o vertical.")
             palabras_sopa = ["CAPITAL", "CAT", "SIPRE", "INSOLUTOS", "TASA"]
-            
-            # Mostrar lista de palabras a buscar
-            st.markdown(f"""
-            <div class='word-list'>
-                <b>Palabras a buscar:</b> {' | '.join(palabras_sopa)}
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f"<div class='word-list'><b>Buscar:</b> {' | '.join(palabras_sopa)}</div>", unsafe_allow_html=True)
             
             if st.button("Generar Nueva Sopa") or 'sopa_grid' not in st.session_state:
                 st.session_state.sopa_grid = generar_sopa_letras(palabras_sopa)
-            
             st.table(pd.DataFrame(st.session_state.sopa_grid))
 
         elif op_juego == "Ahorcado":
-            pool = {"CAPITAL": "Monto neto recibido", "CAT": "Costo total del crédito", "SIPRE": "Portal de consulta IMSS"}
+            pool = {"CAPITAL": "Monto neto recibido", "CAT": "Costo total", "SIPRE": "Portal IMSS"}
             if st.button("Cambiar Palabra") or 'ah_pal' not in st.session_state:
                 p, pis = random.choice(list(pool.items()))
                 st.session_state.ah_pal, st.session_state.ah_pis = p, pis
             st.info(f"Pista: {st.session_state.ah_pis}")
-            resp_ah = st.text_input("Palabra completa:", key="ah_input").upper().strip()
+            resp_ah = st.text_input("Palabra:", key="ah_input").upper().strip()
             if st.button("Verificar"):
                 if resp_ah == st.session_state.ah_pal: st.balloons()
                 else: st.error("Intenta de nuevo")
 
-    # --- TAB EVOLUCIÓN (CON BOTÓN EXPORTAR) ---
+    # --- TAB EVOLUCIÓN ---
     with tabs[4]:
         st.subheader("📊 Mi Historial")
         st.dataframe(hist[["Fecha", "Calificación", "Rango"]], use_container_width=True)
