@@ -79,7 +79,6 @@ else:
     hist = st.session_state.db[st.session_state.db["Nombre"] == nombre_user]
     num_intentos = len(hist)
     
-    # Lógica de niveles
     if num_intentos > 0 and hist.iloc[-1]["Calificación"] >= 10:
         ultimo_nv = hist.iloc[-1]["Nivel"]
         if ultimo_nv == "Básico": nivel, rango = "Avanzado", "Plata"
@@ -142,27 +141,28 @@ else:
         with c1:
             with st.expander("📌 Interés Ordinario"):
                 st.write("**Definición:** Es el costo pactado por el uso del dinero prestado.")
+                st.info("💡 **Tip:** En CSB, este interés es transparente y se calcula desde el inicio.")
             with st.expander("📌 Tabla de Amortización"):
                 st.write("**Definición:** Documento que desglosa capital, intereses y seguros.")
+                st.success("✅ **Ventaja CSB:** El cliente conoce exactamente su saldo final desde el día 1.")
             with st.expander("📌 Saldos Insolutos"):
                 st.write("**Definición:** Interés cobrado sobre el saldo pendiente actual.")
+                st.info("💡 **Tip:** Esto permite liquidaciones anticipadas con ahorro real.")
         with c2:
             with st.expander("⚠️ Interés Compuesto"):
-                st.error("🔒 **Seguridad CSB:** Cero riesgo de interés compuesto por Tasa Fija.")
+                st.error("🔒 **Seguridad CSB:** Cero riesgo de interés compuesto por Tasa Fija y descuento vía pensión.")
             with st.expander("📊 CAT"):
                 st.write("**Definición:** Costo total anual (tasa + seguros + comisiones).")
             with st.expander("📋 Requisitos"):
                 st.markdown("- **INE Vigente**\n- **Correo con acceso a SIPRE**\n- **WhatsApp activo**")
 
     with tabs[3]:
-        # Sección del Asesor
         st.subheader("📊 Tu Historial Personal")
         if not hist.empty:
             st.dataframe(hist[["Fecha", "Nivel", "Calificación"]], use_container_width=True)
         else:
             st.info("Aún no tienes evaluaciones registradas en esta sesión.")
         
-        # Sección exclusiva del Admin (Independiente del historial del asesor)
         if is_admin:
             st.markdown("---")
             st.subheader("🔓 Panel de Control Maestro (Admin)")
@@ -177,4 +177,4 @@ else:
                     key="btn_descarga_admin"
                 )
             else:
-                st.warning("La base de datos global está vacía. Nadie ha hecho evaluaciones todavía.")
+                st.warning("La base de datos global está vacía.")
