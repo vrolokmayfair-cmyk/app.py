@@ -112,7 +112,7 @@ else:
         if st.button("Nueva Pregunta") or st.session_state.ejercicio_actual is None:
             st.session_state.ejercicio_actual = generar_ejercicio(nivel)
         st.info(st.session_state.ejercicio_actual["p"])
-        resp_input = st.text_input("Tu respuesta:").strip().lower()
+        resp_input = st.text_input("Tu respuesta:", key="ans_eval").strip().lower()
         if st.button("Validar"):
             if resp_input == st.session_state.ejercicio_actual["c"]:
                 st.success("¡Excelente!"); calif = 10.0
@@ -200,7 +200,7 @@ else:
             display = "".join(["_ " if c != " " else "  " for c in st.session_state.ahorcado_pal])
             st.write(f"### {display}")
             
-            ans = st.text_input("Tu respuesta:").upper().strip()
+            ans = st.text_input("Tu respuesta:", key="ans_ahorcado").upper().strip()
             if st.button("Comprobar Ahorcado"):
                 if ans.replace(" ", "") == st.session_state.ahorcado_pal.replace(" ", ""):
                     st.balloons(); st.success(f"¡Correcto! Es {st.session_state.ahorcado_pal}")
