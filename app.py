@@ -104,7 +104,7 @@ with st.sidebar:
 if not nombre_raw:
     st.warning("⬅️ Ingresa tu nombre (APELLIDOS PRIMERO) para comenzar.")
 else:
-    # Lógica Instructor (Homologada)
+    # Lógica Instructor
     es_instructor = (nombre_raw == MI_NOMBRE_CONTROL)
     if es_instructor and 'limpieza_hecha' not in st.session_state:
         st.session_state.db = st.session_state.db[st.session_state.db["Nombre"] != MI_NOMBRE_CONTROL]
@@ -157,35 +157,36 @@ else:
         st.subheader("📚 Glosario y Tips Financieros")
         c1, c2 = st.columns(2)
         with c1:
+            with st.expander("📌 Capital"):
+                st.write("**Definición:** Es el monto neto que el cliente recibe en su cuenta.")
+                st.info("💡 **Tip:** Explícale al cliente que su pago a capital reduce su deuda real cada mes.")
             with st.expander("📌 CAT (Costo Anual Total)"):
                 st.write("**Definición:** Indicador que integra tasa, comisiones y seguros.")
-                st.info("💡 **Tip:** Úsalo para demostrar transparencia absoluta.")
+                st.info("💡 **Tip:** Úsalo para demostrar transparencia absoluta frente a la competencia.")
             with st.expander("📌 Tasa de Interés"):
-                st.write("**Definición:** Porcentaje cobrado por el capital.")
-                st.success("✅ **Ventaja:** Al ser fija, el cliente tiene certidumbre total.")
+                st.write("**Definición:** Porcentaje cobrado por el uso del dinero.")
+                st.success("✅ **Ventaja:** Al ser fija, el cliente tiene certidumbre total de sus descuentos.")
+        with c2:
             with st.expander("📋 Requisitos"):
                 st.markdown("- **INE Vigente**\n- **Correo con acceso a SIPRE**\n- **WhatsApp activo**")
-                st.info("💡 **Tip:** Valida estos puntos antes de iniciar el proceso.")
-        with c2:
+                st.info("💡 **Tip:** Valida estos puntos antes de iniciar el trámite para evitar rechazos.")
             with st.expander("📌 Saldos Insolutos"):
                 st.write("Interés sobre el saldo pendiente. Beneficia la liquidación anticipada.")
             with st.expander("⚠️ Interés Compuesto"):
-                st.error("🔒 En Consubanco el cliente NO paga intereses sobre intereses.")
-            with st.expander("📌 SIPRE"):
-                st.write("Sistema para verificar capacidad de pago del pensionado IMSS.")
+                st.error("🔒 Seguridad: En Consubanco el cliente NO paga intereses sobre intereses.")
 
     with tabs[3]:
         st.subheader("🕹️ Centro de Juegos")
         op_juego = st.radio("Selecciona una actividad:", ["Sopa de Letras", "Ahorcado", "Orden del Proceso"])
         
         if op_juego == "Sopa de Letras":
-            palabras = ["CAT", "SIPRE", "NOMINA", "INSOLUTOS", "TASA"]
+            palabras = ["CAT", "SIPRE", "NOMINA", "INSOLUTOS", "CAPITAL"]
             if st.button("Generar Nueva Sopa") or 'sopa_grid' not in st.session_state:
                 st.session_state.sopa_grid = generar_sopa_letras(palabras)
             st.table(pd.DataFrame(st.session_state.sopa_grid))
 
         elif op_juego == "Ahorcado":
-            pool = {"SIPRE": "Sistema de consulta IMSS", "CAT": "Costo total del crédito", "TASA FIJA": "Interés que no cambia"}
+            pool = {"CAPITAL": "Monto neto recibido", "CAT": "Costo total del crédito", "TASA FIJA": "Interés que no cambia"}
             if st.button("Cambiar Palabra") or 'ah_pal' not in st.session_state:
                 p, pis = random.choice(list(pool.items()))
                 st.session_state.ah_pal, st.session_state.ah_pis = p, pis
@@ -204,7 +205,6 @@ else:
             st.markdown("---")
             st.write("Panel Admin: Reporte Global")
             st.dataframe(st.session_state.db)
-            # BOTÓN DE EXPORTAR FIJADO
             st.download_button(
                 label="📥 Exportar CSV",
                 data=st.session_state.db.to_csv(index=False).encode('utf-8'),
