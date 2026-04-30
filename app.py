@@ -158,20 +158,21 @@ else:
         c1, c2 = st.columns(2)
         with c1:
             with st.expander("📌 CAT (Costo Anual Total)"):
-                st.write("**Definición:** Es el indicador que integra la tasa de interés, comisiones y seguros.")
-                st.info("💡 **Tip:** Úsalo para demostrar que en Consubanco no hay letras chiquitas.")
+                st.write("**Definición:** Indicador que integra tasa, comisiones y seguros.")
+                st.info("💡 **Tip:** Úsalo para demostrar transparencia absoluta.")
             with st.expander("📌 Tasa de Interés"):
-                st.write("**Definición:** El porcentaje que se cobra por el uso del capital.")
-                st.success("✅ **Ventaja CSB:** Nuestra tasa es fija, lo que da seguridad al pensionado.")
-            with st.expander("📌 Tabla de Amortización"):
-                st.write("Documento que detalla cada pago. Da total transparencia al cliente.")
+                st.write("**Definición:** Porcentaje cobrado por el capital.")
+                st.success("✅ **Ventaja:** Al ser fija, el cliente tiene certidumbre total.")
+            with st.expander("📋 Requisitos"):
+                st.markdown("- **INE Vigente**\n- **Correo con acceso a SIPRE**\n- **WhatsApp activo**")
+                st.info("💡 **Tip:** Valida estos puntos antes de iniciar el proceso.")
         with c2:
             with st.expander("📌 Saldos Insolutos"):
-                st.write("Interés sobre el saldo pendiente. Permite ahorrar al liquidar antes.")
+                st.write("Interés sobre el saldo pendiente. Beneficia la liquidación anticipada.")
             with st.expander("⚠️ Interés Compuesto"):
-                st.error("🔒 Seguridad: En Consubanco el cliente NO paga intereses sobre intereses.")
+                st.error("🔒 En Consubanco el cliente NO paga intereses sobre intereses.")
             with st.expander("📌 SIPRE"):
-                st.write("Sistema para verificar la capacidad de pago del pensionado IMSS.")
+                st.write("Sistema para verificar capacidad de pago del pensionado IMSS.")
 
     with tabs[3]:
         st.subheader("🕹️ Centro de Juegos")
@@ -203,4 +204,10 @@ else:
             st.markdown("---")
             st.write("Panel Admin: Reporte Global")
             st.dataframe(st.session_state.db)
-            st.download_button("📥 Exportar CSV", data=st.session_state.db.to_csv(index=False), file_name="Reporte_Academia.csv")
+            # BOTÓN DE EXPORTAR FIJADO
+            st.download_button(
+                label="📥 Exportar CSV",
+                data=st.session_state.db.to_csv(index=False).encode('utf-8'),
+                file_name=f"Reporte_Academia_{datetime.date.today()}.csv",
+                mime='text/csv'
+            )
