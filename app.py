@@ -57,27 +57,29 @@ if 'db' not in st.session_state:
 if 'ejercicio_actual' not in st.session_state:
     st.session_state.ejercicio_actual = None
 
-# --- LÓGICA DE EVALUACIÓN (REINTEGRADA) ---
+# --- LÓGICA DE EVALUACIÓN CON RETROALIMENTACIÓN ---
 def generar_ejercicio(nivel):
     if nivel == "Básico":
         pago = random.randint(15, 45) * 100
         plazo = random.choice([12, 24, 36, 48, 60])
+        total = pago * plazo
         return {
             "p": f"CÁLCULO RÁPIDO: Si un cliente tiene un descuento mensual de ${pago:,.0f} a un plazo de {plazo} meses, ¿cuál es el Monto Total que pagará al final del crédito?",
-            "c": str(pago * plazo)
+            "c": str(total),
+            "r": f"Retroalimentación: El Monto Total se obtiene multiplicando el pago mensual (${pago:,.0f}) por el número de meses ({plazo}). El resultado correcto es ${total:,.0f}."
         }
     elif nivel == "Avanzado":
         opciones = [
-            {"p": "¿Qué concepto define el costo total del crédito expresado en términos porcentuales anuales?", "c": "cat"},
-            {"p": "¿Cómo se llama el esquema donde los intereses se calculan sobre lo que el cliente aún debe?", "c": "saldos insolutos"},
-            {"p": "¿Qué documento es vital entregar para que el cliente vea el desglose de sus pagos?", "c": "tabla de amortización"}
+            {"p": "¿Qué concepto define el costo total del crédito expresado en términos porcentuales anuales?", "c": "cat", "r": "Retroalimentación: El CAT (Costo Anual Total) es el indicador clave que suma tasa, comisiones y seguros para comparar créditos."},
+            {"p": "¿Cómo se llama el esquema donde los intereses se calculan sobre lo que el cliente aún debe?", "c": "saldos insolutos", "r": "Retroalimentación: Los Saldos Insolutos permiten que el interés baje conforme el cliente paga capital."},
+            {"p": "¿Qué documento es vital entregar para que el cliente vea el desglose de sus pagos?", "c": "tabla de amortización", "r": "Retroalimentación: La Tabla de Amortización es el calendario detallado de pagos, intereses y seguros."}
         ]
         return random.choice(opciones)
     else: # Experto
         opciones = [
-            {"p": "¿Por qué la Tasa Fija es un argumento de venta superior ante la inflación?", "c": "seguridad"},
-            {"p": "Verdadero o Falso: ¿Consubanco aplica interés compuesto en sus créditos de nómina?", "c": "falso"},
-            {"p": "¿Cuál es la herramienta principal para validar la capacidad de descuento de un pensionado IMSS?", "c": "sipre"}
+            {"p": "¿Por qué la Tasa Fija es un argumento de venta superior ante la inflación?", "c": "seguridad", "r": "Retroalimentación: La Tasa Fija garantiza que el descuento del cliente no subirá aunque la economía sea inestable, dándole seguridad."},
+            {"p": "Verdadero o Falso: ¿Consubanco aplica interés compuesto en sus créditos de nómina?", "c": "falso", "r": "Retroalimentación: Es Falso. En Consubanco no hay anatocismo (cobro de intereses sobre intereses)."},
+            {"p": "¿Cuál es la herramienta principal para validar la capacidad de descuento de un pensionado IMSS?", "c": "sipre", "r": "Retroalimentación: El SIPRE es el portal oficial para consultar la capacidad de descuento disponible del pensionado."}
         ]
         return random.choice(opciones)
 
@@ -119,6 +121,7 @@ with st.sidebar:
 if not nombre_raw:
     st.warning("⬅️ Ingresa tu nombre (APELLIDOS PRIMERO) para comenzar.")
 else:
+    # Lógica Instructor
     es_instructor = (nombre_raw == MI_NOMBRE_CONTROL)
     if es_instructor and 'limpieza_hecha' not in st.session_state:
         st.session_state.db = st.session_state.db[st.session_state.db["Nombre"] != MI_NOMBRE_CONTROL]
@@ -137,7 +140,7 @@ else:
 
     tabs = st.tabs(["📝 Evaluación", "🎙️ Roleplay", "📚 Glosario e Infografías", "🕹️ Centro de Juegos", "📊 Evolución"])
 
-    # --- TAB EVALUACIÓN (RESTABLECIDO) ---
+    # --- TAB EVALUACIÓN CON RETROALIMENTACIÓN ---
     with tabs[0]:
         st.subheader("Módulo de Evaluación Dinámica")
         if st.button("Generar Nueva Pregunta") or st.session_state.ejercicio_actual is None:
@@ -148,10 +151,11 @@ else:
         
         if st.button("Validar y Guardar"):
             if resp == st.session_state.ejercicio_actual["c"]:
-                st.success("¡Correcto! +10 puntos.")
+                st.success("¡Excelente! Respuesta correcta (+10 puntos).")
                 calif = 10.0
             else:
-                st.error(f"Incorrecto. La respuesta era: {st.session_state.ejercicio_actual['c']}")
+                st.error(f"Incorrecto.")
+                st.warning(st.session_state.ejercicio_actual["r"]) # Mostrar retroalimentación
                 calif = 0.0
             
             log = {
@@ -161,20 +165,20 @@ else:
             }
             st.session_state.db = pd.concat([st.session_state.db, pd.DataFrame([log])], ignore_index=True)
             guardar_datos(st.session_state.db)
-            st.session_state.ejercicio_actual = None # Forzar nueva pregunta
-            st.rerun()
+            st.session_state.ejercicio_actual = None 
+            st.info("💡 Haz clic en 'Generar Nueva Pregunta' para continuar.")
 
     # --- TAB ROLEPLAY ---
     with tabs[1]:
         st.subheader("🎙️ Entrenamiento de Speech")
-        guion = st.text_area("Pega aquí tu speech de venta o cierre:", height=200)
-        if st.button("Analizar Estructura"):
-            puntos = 0
+        guion = st.text_area("Pega aquí tu speech de venta:", height=200)
+        if st.button("Analizar"):
             texto = guion.lower()
-            if any(x in texto for x in ["hola", "buen día"]): puntos += 3
-            if any(x in texto for x in ["monto", "plazo", "pago"]): puntos += 4
-            if any(x in texto for x in ["consubanco", "beneficio"]): puntos += 3
-            st.metric("Calidad del Speech", f"{puntos}/10")
+            p = 0
+            if "hola" in texto: p += 3
+            if any(x in texto for x in ["monto", "pago"]): p += 4
+            if "consubanco" in texto: p += 3
+            st.metric("Calidad", f"{p}/10")
 
     # --- TAB GLOSARIO COMPLETO ---
     with tabs[2]:
@@ -182,27 +186,27 @@ else:
             components.iframe("https://www.canva.com/design/DAHA28GoS8E/4gQn7nxFU_eDZx6KMy5ylQ/view?embed", height=500)
             st.markdown("---")
         
-        st.subheader("📚 Glosario y Tips Financieros")
+        st.subheader("📚 Glosario Financiero")
         c1, c2 = st.columns(2)
         with c1:
             with st.expander("📌 Capital"):
-                st.write("**Definición:** Monto neto recibido por el cliente.")
-                st.info("💡 **Tip:** El pago a capital reduce la deuda real mes con mes.")
+                st.write("**Definición:** Monto neto que el cliente recibe.")
+                st.info("💡 Tip: El abono a capital reduce la deuda real mes a mes.")
             with st.expander("📌 CAT"):
-                st.write("**Definición:** Costo Anual Total (incluye seguros y comisiones).")
-                st.info("💡 **Tip:** Transparencia absoluta para cerrar la venta.")
+                st.write("**Definición:** Costo Anual Total (tasa + seguros + comisiones).")
+                st.info("💡 Tip: Ideal para comparar transparencia contra la competencia.")
             with st.expander("📌 Tasa de Interés"):
-                st.write("**Definición:** Costo del dinero prestado.")
-                st.success("✅ Tasa fija: El descuento no cambia nunca.")
+                st.write("**Definición:** El precio del dinero prestado.")
+                st.success("✅ Ventaja: Nuestra tasa es fija, garantizando estabilidad.")
         with c2:
             with st.expander("📋 Requisitos"):
-                st.markdown("- **INE Vigente**\n- **Correo con acceso a SIPRE**\n- **WhatsApp activo**")
+                st.write("- INE Vigente\n- Correo con SIPRE\n- WhatsApp")
             with st.expander("📌 Saldos Insolutos"):
-                st.write("Interés sobre el saldo pendiente. Beneficia la liquidación anticipada.")
+                st.write("Cálculo sobre el remanente. Facilita liquidar antes y ahorrar.")
             with st.expander("⚠️ Interés Compuesto"):
-                st.error("🔒 En Consubanco NO se cobran intereses sobre intereses.")
+                st.error("🔒 Seguridad: En Consubanco NO cobramos intereses sobre intereses.")
             with st.expander("📌 SIPRE"):
-                st.write("Sistema de consulta para la capacidad de pago (IMSS).")
+                st.write("Portal para validar la capacidad de pago del pensionado IMSS.")
 
     # --- TAB JUEGOS ---
     with tabs[3]:
@@ -210,24 +214,22 @@ else:
         op_juego = st.radio("Selecciona actividad:", ["Sopa de Letras", "Ahorcado"])
         
         if op_juego == "Sopa de Letras":
-            st.markdown("### 🔍 Instrucciones:\nBusca las palabras en horizontal o vertical.")
+            st.markdown("### 🔍 Busca estas palabras:")
             palabras_sopa = ["CAPITAL", "CAT", "SIPRE", "INSOLUTOS", "TASA"]
-            st.markdown(f"<div class='word-list'><b>Buscar:</b> {' | '.join(palabras_sopa)}</div>", unsafe_allow_html=True)
-            
-            if st.button("Generar Nueva Sopa") or 'sopa_grid' not in st.session_state:
+            st.markdown(f"<div class='word-list'>{' | '.join(palabras_sopa)}</div>", unsafe_allow_html=True)
+            if st.button("Nueva Sopa") or 'sopa_grid' not in st.session_state:
                 st.session_state.sopa_grid = generar_sopa_letras(palabras_sopa)
             st.table(pd.DataFrame(st.session_state.sopa_grid))
 
         elif op_juego == "Ahorcado":
-            pool = {"CAPITAL": "Monto neto recibido", "CAT": "Costo total", "SIPRE": "Portal IMSS"}
-            if st.button("Cambiar Palabra") or 'ah_pal' not in st.session_state:
+            pool = {"CAPITAL": "Monto neto", "CAT": "Costo total", "SIPRE": "Portal IMSS"}
+            if st.button("Nueva Palabra") or 'ah_pal' not in st.session_state:
                 p, pis = random.choice(list(pool.items()))
                 st.session_state.ah_pal, st.session_state.ah_pis = p, pis
             st.info(f"Pista: {st.session_state.ah_pis}")
-            resp_ah = st.text_input("Palabra:", key="ah_input").upper().strip()
+            resp_ah = st.text_input("Escribe la palabra:", key="ah_input").upper().strip()
             if st.button("Verificar"):
                 if resp_ah == st.session_state.ah_pal: st.balloons()
-                else: st.error("Intenta de nuevo")
 
     # --- TAB EVOLUCIÓN ---
     with tabs[4]:
@@ -235,11 +237,11 @@ else:
         st.dataframe(hist[["Fecha", "Calificación", "Rango"]], use_container_width=True)
         if is_admin:
             st.markdown("---")
-            st.write("### Panel de Control (Admin)")
+            st.write("### Panel Administrativo")
             st.dataframe(st.session_state.db)
             st.download_button(
                 label="📥 Exportar CSV",
                 data=st.session_state.db.to_csv(index=False).encode('utf-8'),
-                file_name=f"Reporte_Academia_{datetime.date.today()}.csv",
+                file_name=f"Reporte_General_{datetime.date.today()}.csv",
                 mime='text/csv'
             )
