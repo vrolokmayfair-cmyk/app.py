@@ -28,10 +28,6 @@ st.markdown(f"""
         margin-bottom: 20px;
     }}
     h1, h2, h3 {{ color: {COLOR_AZUL}; font-family: 'Arial'; }}
-    .game-card {{
-        background-color: white; padding: 20px; border-radius: 10px;
-        border: 1px solid #ddd; margin-bottom: 10px;
-    }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -42,7 +38,7 @@ if 'db' not in st.session_state:
 if 'ejercicio_actual' not in st.session_state:
     st.session_state.ejercicio_actual = None
 
-# --- FUNCIONES DE APOYO ---
+# --- FUNCIONES TÉCNICAS Y DE JUEGOS ---
 def generar_ejercicio(nivel):
     if nivel == "Básico":
         pago = random.randint(10, 30) * 100
@@ -65,21 +61,21 @@ def generar_sopa_letras(palabras, tamaño=15):
     for palabra in palabras:
         palabra = palabra.upper()
         colocada = False
-        while not colocada:
-            direccion = random.choice([(0,1), (1,0)]) # Horizontal o Vertical
+        intentos = 0
+        while not colocada and intentos < 50:
+            direccion = random.choice([(0,1), (1,0)])
             fila = random.randint(0, tamaño - 1 if direccion == (0,1) else tamaño - len(palabra))
             col = random.randint(0, tamaño - len(palabra) if direccion == (0,1) else tamaño - 1)
-            
             puedo = True
             for i in range(len(palabra)):
-                if grid[fila + i*direccion[0]][col + i*direccion[1]] not in (string.ascii_uppercase + palabra[i]):
-                    if grid[fila + i*direccion[0]][col + i*direccion[1]] != palabra[i]:
-                        puedo = True # Simplificado para demo
-            
+                target = grid[fila + i*direccion[0]][col + i*direccion[1]]
+                if target != palabra[i] and target in [p[0] for p in palabras]: # Evitar sobreescribir palabras ya puestas
+                    puedo = False
             if puedo:
                 for i in range(len(palabra)):
                     grid[fila + i*direccion[0]][col + i*direccion[1]] = palabra[i]
                 colocada = True
+            intentos += 1
     return grid
 
 # --- INTERFAZ PRINCIPAL ---
@@ -102,7 +98,6 @@ else:
     hist = st.session_state.db[st.session_state.db["Nombre"] == nombre_user]
     num_intentos = len(hist)
     
-    # Lógica de niveles y rangos
     if num_intentos > 0 and hist.iloc[-1]["Calificación"] >= 10:
         ultimo_nv = hist.iloc[-1]["Nivel"]
         if ultimo_nv == "Básico": nivel, rango = "Avanzado", "Plata"
@@ -114,10 +109,7 @@ else:
 
     tabs = st.tabs(["📝 Evaluación", "🎙️ Roleplay", "📚 Glosario", "🕹️ Centro de Juegos", "📊 Evolución"])
 
-    # TABS 0, 1 y 2 se mantienen igual al código base anterior...
-    # (Evaluación, Roleplay y Glosario con Tips incluidos)
-    
-    with tabs[0]:
+    with tabs[0]: # Evaluación
         if st.button("Nueva Pregunta") or st.session_state.ejercicio_actual is None:
             st.session_state.ejercicio_actual = generar_ejercicio(nivel)
         st.info(st.session_state.ejercicio_actual["p"])
@@ -129,66 +121,58 @@ else:
             st.session_state.db = pd.concat([st.session_state.db, pd.DataFrame([log])], ignore_index=True)
             st.session_state.ejercicio_actual = None
 
-    with tabs[1]:
+    with tabs[1]: # Roleplay
         st.subheader("🎙️ Entrenamiento Modelo B")
-        guion = st.text_area("Escribe tu llamada aquí:", height=200)
-        if st.button("Calificar Roleplay"):
-            # Lógica de pilares (Presentación, Monto, etc.)
-            st.success("Análisis completado (Simulado para esta versión)")
+        st.write("Escribe tu guion siguiendo los pilares de venta.")
+        st.text_area("Caja de texto para práctica:", height=200)
 
-    with tabs[2]:
+    with tabs[2]: # Glosario
         st.subheader("📚 Conceptos y Tips")
-        c1, c2 = st.columns(2)
-        with c1:
-            with st.expander("📌 Interés Ordinario"):
-                st.write("Costo por el uso del dinero.")
-                st.info("💡 Tip: En CSB es transparente desde el inicio.")
-        with c2:
-            with st.expander("⚠️ Interés Compuesto"):
-                st.error("🔒 Seguridad CSB: Cero riesgo por Tasa Fija.")
+        with st.expander("📌 Interés Ordinario"):
+            st.write("Costo por el uso del dinero.")
+            st.info("💡 Tip: En CSB es transparente.")
 
-    # --- NUEVA PESTAÑA: CENTRO DE JUEGOS ---
+    # --- CENTRO DE JUEGOS ACTUALIZADO ---
     with tabs[3]:
-        st.subheader("🕹️ Zona de Gamificación para Formación")
+        st.subheader("🕹️ Centro de Juegos")
+        juego = st.radio("Actividad:", ["Sopa de Letras", "Ahorcado", "Orden del Proceso"])
         
-        juego = st.radio("Selecciona una actividad:", ["Sopa de Letras (15x15)", "Ahorcado Técnico", "Orden del Proceso"])
-        
-        if juego == "Sopa de Letras (15x15)":
-            st.write("🔍 **Encuentra las palabras:** CAT, SIPRE, INSOLUTOS, NOMINA, PENSIONADO")
-            if st.button("Generar Nueva Sopa"):
-                st.session_state.sopa = generar_sopa_letras(["CAT", "SIPRE", "INSOLUTOS", "NOMINA", "PENSIONADO"])
-            
-            if 'sopa' in st.session_state:
-                # Mostrar sopa en formato tabla
-                df_sopa = pd.DataFrame(st.session_state.sopa)
-                st.table(df_sopa)
-                st.caption("Tip: Las palabras pueden estar horizontales o verticales.")
+        if juego == "Sopa de Letras":
+            palabras_sopa = ["CAT", "SIPRE", "INSOLUTOS", "NOMINA", "PENSIONADO", "AMORTIZACION"]
+            st.write(f"🔍 **Busca:** {', '.join(palabras_sopa)}")
+            if st.button("Generar Sopa") or 'sopa_grid' not in st.session_state:
+                st.session_state.sopa_grid = generar_sopa_letras(palabras_sopa)
+            st.table(pd.DataFrame(st.session_state.sopa_grid))
 
-        elif juego == "Ahorcado Técnico":
-            palabra_reto = "AMORTIZACION"
-            st.write("🧩 **Adivina la palabra:**")
-            st.write("_ " * len(palabra_reto))
-            st.info("Pista: Documento que desglosa pago a pago el capital e interés.")
-            intento = st.text_input("Escribe una letra o la palabra completa:").upper()
-            if st.button("Adivinar"):
-                if intento == palabra_reto: st.balloons(); st.success("¡Correcto!")
-                else: st.error("Sigue intentando...")
+        elif juego == "Ahorcado":
+            pool_palabras = {
+                "SIPRE": "Sistema para consultar capacidad de descuento.",
+                "CAT": "Costo Anual Total de un crédito.",
+                "NOMINA": "Tipo de descuento directo al sueldo o pensión.",
+                "INSOLUTOS": "Intereses calculados sobre el saldo pendiente.",
+                "VIGENTE": "Estado necesario de la identificación oficial (INE)."
+            }
+            if st.button("Nueva Palabra") or 'ahorcado_palabra' not in st.session_state:
+                p, pista = random.choice(list(pool_palabras.items()))
+                st.session_state.ahorcado_palabra = p
+                st.session_state.ahorcado_pista = pista
+            
+            st.info(f"Pista: {st.session_state.ahorcado_pista}")
+            st.write("_ " * len(st.session_state.ahorcado_palabra))
+            intento_ah = st.text_input("Adivina la palabra o una letra:").upper()
+            if st.button("Comprobar"):
+                if intento_ah == st.session_state.ahorcado_palabra:
+                    st.balloons(); st.success("¡CORRECTO!")
+                else: st.error("Intenta de nuevo.")
 
         elif juego == "Orden del Proceso":
-            st.write("🔢 **Ordena los pasos del Modelo B de Venta:**")
-            pasos = ["Cierre de Venta", "Presentación", "Monto y Plazo", "Requisitos"]
-            orden = st.multiselect("Selecciona en el orden correcto:", pasos)
-            if st.button("Verificar Orden"):
-                if orden == ["Presentación", "Monto y Plazo", "Requisitos", "Cierre de Venta"]:
-                    st.success("¡Orden Perfecto! Estás listo para piso de ventas.")
-                else:
-                    st.warning("Revisa el manual, el orden es vital para la confianza del cliente.")
+            st.write("🔢 **Ordena el Modelo B:**")
+            pasos = ["Cierre", "Presentación", "Monto", "Requisitos"]
+            sel_orden = st.multiselect("Pasos:", pasos)
+            if st.button("Validar Orden"):
+                if sel_orden == ["Presentación", "Monto", "Requisitos", "Cierre"]:
+                    st.success("¡Perfecto!")
+                else: st.warning("Revisa el flujo oficial.")
 
-    with tabs[4]:
-        st.subheader("📊 Historial y Control")
+    with tabs[4]: # Evolución
         if not hist.empty: st.dataframe(hist[["Fecha", "Nivel", "Calificación"]], use_container_width=True)
-        if is_admin:
-            st.markdown("---")
-            if not st.session_state.db.empty:
-                csv = st.session_state.db.to_csv(index=False).encode('utf-8')
-                st.download_button("📥 REPORTE ADMIN", data=csv, file_name="Reporte_Academia.csv", key="dl_admin")
