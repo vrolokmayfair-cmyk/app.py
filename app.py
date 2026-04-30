@@ -90,7 +90,7 @@ with st.sidebar:
     
     with st.expander("🔐 Acceso Administrador"):
         admin_pass = st.text_input("Contraseña:", type="password")
-        is_admin = (admin_pass == "CSB2026")
+        is_admin = (admin_pass == "CSB2026") # Clave única de administración
 
 if not nombre_user:
     st.warning("⬅️ Ingresa tu nombre en el panel lateral para comenzar.")
@@ -153,24 +153,13 @@ else:
             else: st.warning(f"Calificación: {calif_rp}/10")
 
     with tabs[2]:
-        st.subheader("📖 Material de Apoyo Interactivo")
-        
-        # --- CONTROL DE ACCESO A LA PRESENTACIÓN ---
-        st.write("Para visualizar el material exclusivo, ingresa la clave autorizada:")
-        clave_material = st.text_input("Clave de Acceso Material:", type="password", key="pass_canva")
-        
-        # Puedes cambiar 'CANVA2026' por la clave que prefieras
-        if clave_material == "CANVA2026":
-            st.success("Acceso concedido al material de apoyo.")
+        # --- MATERIAL DE APOYO DINÁMICO ---
+        if is_admin:
+            st.subheader("📖 Material de Apoyo Interactivo (Modo Admin)")
             canva_url = "https://www.canva.com/design/DAHA28GoS8E/4gQn7nxFU_eDZx6KMy5ylQ/view?embed"
             components.iframe(canva_url, height=500, scrolling=True)
-        else:
-            if clave_material:
-                st.error("Clave incorrecta. Solicita acceso a tu instructor.")
-            else:
-                st.info("🔒 Contenido bloqueado. Ingresa la clave para desbloquear.")
+            st.markdown("---")
         
-        st.markdown("---")
         st.subheader("📚 Conceptos Clave y Ventajas Consubanco")
         c1, c2 = st.columns(2)
         with c1:
