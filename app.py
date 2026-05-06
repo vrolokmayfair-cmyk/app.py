@@ -60,7 +60,7 @@ if 'ejercicio_teoria' not in st.session_state:
 if 'ejercicio_practico' not in st.session_state:
     st.session_state.ejercicio_practico = None
 
-# --- LÓGICA DE EJERCICIOS EXPANDIDA (FLEXIBILIDAD Y VARIEDAD) ---
+# --- LÓGICA DE EJERCICIOS ---
 def generar_teoria():
     banco = [
         {"p": "¿Cómo se llama el cobro de interés sobre el capital pendiente?", "c": ["insoluto", "saldos insolutos", "saldo insoluto"], "r": "Retroalimentación: Los saldos insolutos permiten ahorrar intereses al liquidar antes."},
@@ -142,16 +142,30 @@ else:
             st.session_state.db = pd.concat([st.session_state.db, pd.DataFrame([log])], ignore_index=True)
             guardar_datos(st.session_state.db)
 
+    # --- CORRECCIÓN EN EL ANÁLISIS MÉTODO B ---
     with tabs[1]:
         st.subheader("🎙️ Análisis Método B")
         speech = st.text_area("Pega tu speech aquí:", height=150)
         if st.button("Analizar Speech"):
             t = speech.lower()
             errs = []
-            if not any(x in t for x in ["hola", "buen"]): errs.append("- Falta saludo.")
-            if not any(x in t for x in ["monto", "pago"]): errs.append("- Falta oferta económica.")
-            if "consubanco" not in t: errs.append("- Falta mencionar la marca.")
-            if not errs: st.success("¡Speech Excelente!")
+            
+            # Validación de Saludo
+            if not any(x in t for x in ["hola", "buen", "buenos días", "buenas tardes"]): 
+                errs.append("- 🚩 Falta un saludo profesional inicial.")
+            
+            # Validación de Oferta Económica (MEJORADA)
+            # Ahora busca palabras clave O símbolos de dinero/números de miles
+            tiene_oferta = any(x in t for x in ["monto", "pago", "descuento", "$", "pesos", "000"])
+            if not tiene_oferta: 
+                errs.append("- 🚩 Falta mencionar la oferta económica o condiciones del crédito.")
+            
+            # Validación de Marca
+            if "consubanco" not in t: 
+                errs.append("- 🚩 Es vital mencionar el respaldo de Consubanco.")
+            
+            if not errs: 
+                st.success("¡Excelente! Tu speech cumple con los pilares del Método B.")
             else: 
                 st.error("Retroalimentación de Speech:")
                 for e in errs: st.write(e)
