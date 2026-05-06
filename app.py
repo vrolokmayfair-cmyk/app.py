@@ -60,12 +60,16 @@ if 'ejercicio_teoria' not in st.session_state:
 if 'ejercicio_practico' not in st.session_state:
     st.session_state.ejercicio_practico = None
 
-# --- LÓGICA DE EJERCICIOS ---
+# --- LÓGICA DE EJERCICIOS CON FLEXIBILIDAD DE LENGUAJE ---
 def generar_teoria():
     opciones = [
-        {"p": "¿Qué siglas definen el costo anual total?", "c": "cat", "r": "Retroalimentación: El CAT incluye tasa, comisiones y seguros en un solo indicador."},
-        {"p": "¿Cómo se llama el cobro sobre el capital pendiente?", "c": "saldos insolutos", "r": "Retroalimentación: Los saldos insolutos permiten ahorrar intereses al liquidar antes."},
-        {"p": "¿Qué portal valida la capacidad del pensionado IMSS?", "c": "sipre", "r": "Retroalimentación: El SIPRE es la herramienta oficial de validación de descuentos."}
+        {
+            "p": "¿Cómo se llama el cobro sobre el capital pendiente?", 
+            "c": ["insoluto", "saldos insolutos", "saldo insoluto"], 
+            "r": "Retroalimentación: Los saldos insolutos permiten ahorrar intereses al liquidar antes ya que el interés se calcula sobre lo que se debe."
+        },
+        {"p": "¿Qué siglas definen el costo anual total?", "c": ["cat"], "r": "Retroalimentación: El CAT incluye tasa, comisiones y seguros en un solo indicador para comparar créditos."},
+        {"p": "¿Qué portal valida la capacidad del pensionado IMSS?", "c": ["sipre"], "r": "Retroalimentación: El SIPRE es la herramienta oficial de validación de descuentos para el sector IMSS."}
     ]
     return random.choice(opciones)
 
@@ -85,27 +89,22 @@ st.title("🏦 Academia de Ventas Consubanco")
 with st.sidebar:
     st.image("https://www.consubanco.com/assets/images/logo.svg", width=180)
     st.markdown("---")
-    
-    # --- SECCIÓN DE INSTRUCCIONES ---
     st.markdown("""
     <div class='instrucciones-box'>
     <b>📋 INSTRUCCIONES DE ACCESO:</b><br><br>
-    1. <b>Registro:</b> Ingresa tu nombre completo empezando por APELLIDOS.<br>
-    2. <b>Navegación:</b> Usa las pestañas superiores para alternar entre evaluación, glosario y juegos.<br>
-    3. <b>Evaluación:</b> Selecciona el módulo (Teoría o Cálculo) y presiona 'Generar' para iniciar.<br>
-    4. <b>Progreso:</b> Tus resultados se guardan automáticamente para tu supervisor.
+    1. <b>Registro:</b> Ingresa tu nombre empezando por APELLIDOS.<br>
+    2. <b>Navegación:</b> Usa las pestañas superiores para cambiar de módulo.<br>
+    3. <b>Evaluación:</b> Responde y valida. Si fallas, revisa la retroalimentación.<br>
     </div>
     """, unsafe_allow_html=True)
 
-    st.error("⚠️ **INGRESO DE USUARIO:**")
     nombre_raw = st.text_input("NOMBRE COMPLETO:").strip().upper()
-    
     with st.expander("🔐 Administrador"):
         admin_pass = st.text_input("Contraseña:", type="password")
         is_admin = (admin_pass == "CSB2026")
 
 if not nombre_raw:
-    st.warning("⬅️ Por favor, sigue las instrucciones del panel lateral e ingresa tu nombre.")
+    st.warning("⬅️ Ingresa tu nombre en el panel lateral para comenzar.")
 else:
     es_instructor = (nombre_raw == MI_NOMBRE_CONTROL)
     hist = st.session_state.db[st.session_state.db["Nombre"] == nombre_raw]
@@ -116,10 +115,10 @@ else:
 
     tabs = st.tabs(["📝 Evaluación", "🎙️ Roleplay", "📚 Glosario e Infografías", "🕹️ Centro de Juegos", "📊 Evolución"])
 
-    # --- TAB EVALUACIÓN EN DOS MÓDULOS ---
+    # --- TAB EVALUACIÓN ---
     with tabs[0]:
-        st.subheader("Módulos de Evaluación Dinámica")
-        mod_sel = st.radio("Selecciona el tipo de ejercicio:", ["Teoría y Conceptos", "Laboratorio de Cálculos"], horizontal=True)
+        st.subheader("Evaluación Dinámica")
+        mod_sel = st.radio("Tipo de ejercicio:", ["Teoría y Conceptos", "Laboratorio de Cálculos"], horizontal=True)
         
         if mod_sel == "Teoría y Conceptos":
             if st.button("Generar Pregunta Teórica") or st.session_state.ejercicio_teoria is None:
@@ -134,8 +133,12 @@ else:
         resp = st.text_input("Tu respuesta:", key=f"ans_{mod_sel}").strip().lower()
         
         if st.button("Validar Respuesta"):
-            if resp == ej["c"]:
-                st.success("¡Excelente! Respuesta correcta.")
+            # Validación flexible
+            resp_correcta = ej["c"]
+            es_valida = resp in resp_correcta if isinstance(resp_correcta, list) else resp == resp_correcta
+            
+            if es_valida:
+                st.success("¡Correcto!")
                 calif = 10.0
             else:
                 st.error("Incorrecto.")
@@ -146,65 +149,30 @@ else:
             st.session_state.db = pd.concat([st.session_state.db, pd.DataFrame([log])], ignore_index=True)
             guardar_datos(st.session_state.db)
 
-    # --- TAB ROLEPLAY CON RETROALIMENTACIÓN ---
-    with tabs[1]:
-        st.subheader("🎙️ Análisis de Speech (Método B)")
-        speech = st.text_area("Pega tu speech de venta aquí:", height=150)
-        if st.button("Evaluar Estructura"):
-            texto = speech.lower()
-            retro = []
-            score = 0
-            if any(x in texto for x in ["hola", "buen día", "buenos días"]): score += 3
-            else: retro.append("- 🚩 Falta saludo inicial y presentación.")
-            
-            if any(x in texto for x in ["monto", "plazo", "pago", "descuento"]): score += 4
-            else: retro.append("- 🚩 No mencionaste las condiciones del crédito (monto/pago).")
-            
-            if any(x in texto for x in ["consubanco", "beneficio", "seguro"]): score += 3
-            else: retro.append("- 🚩 Falta resaltar el respaldo de Consubanco.")
-            
-            st.metric("Calidad de Llamada", f"{score}/10")
-            for r in retro: st.info(r)
-            if score == 10: st.success("¡Excelente dominio del Método B!")
-
-    # --- TAB GLOSARIO COMPLETO ---
+    # --- TAB GLOSARIO CON TIPS COMPLETOS ---
     with tabs[2]:
         if is_admin:
             components.iframe("https://www.canva.com/design/DAHA28GoS8E/4gQn7nxFU_eDZx6KMy5ylQ/view?embed", height=500)
             st.markdown("---")
-        st.subheader("📚 Glosario y Tips Financieros")
+        
+        st.subheader("📚 Glosario y Tips de Venta")
         c1, c2 = st.columns(2)
         with c1:
             with st.expander("📌 Capital"):
-                st.write("Monto neto recibido por el cliente.")
-                st.info("💡 Tip: El abono a capital reduce la deuda real cada mes.")
+                st.write("**Definición:** El monto real que se presta al cliente.")
+                st.info("💡 **Tip:** Explica que cada pago reduce el capital, lo que disminuye el interés total a largo plazo.")
             with st.expander("📌 CAT"):
-                st.write("Costo Anual Total. Incluye tasa, seguros y comisiones.")
+                st.write("**Definición:** Costo Anual Total (tasa + comisiones + seguros).")
+                st.info("💡 **Tip:** Úsalo para demostrar que no tenemos letras chiquitas comparado con la competencia.")
             with st.expander("📌 Tasa Fija"):
-                st.success("✅ Garantía: El pago del cliente no subirá jamás.")
+                st.write("**Definición:** Interés que no cambia durante el crédito.")
+                st.success("✅ **Tip:** Véndelo como seguridad: 'Su descuento será el mismo hoy y en 5 años'.")
         with c2:
-            with st.expander("📋 Requisitos"):
-                st.write("- INE Vigente, Correo con SIPRE y WhatsApp.")
             with st.expander("📌 Saldos Insolutos"):
-                st.write("Cálculo de interés sobre lo que se debe actualmente.")
+                st.write("**Definición:** Interés cobrado solo sobre lo que falta pagar.")
+                st.info("💡 **Tip:** Es el mejor argumento para clientes que quieren liquidar antes de tiempo.")
             with st.expander("📌 SIPRE"):
-                st.write("Portal para validar capacidad de pago del pensionado.")
-
-    # --- TAB JUEGOS ---
-    with tabs[3]:
-        st.subheader("🕹️ Centro de Juegos")
-        op = st.radio("Selecciona:", ["Sopa de Letras", "Ahorcado"], horizontal=True)
-        if op == "Sopa de Letras":
-            st.write("Busca: CAPITAL | CAT | SIPRE | TASA | INSOLUTOS")
-            # (Aquí iría la lógica de generación de la sopa ya definida previamente)
-            st.info("Función de sopa de letras lista para entrenamiento.")
-
-    # --- TAB EVOLUCIÓN ---
-    with tabs[4]:
-        st.subheader("📊 Historial Personal")
-        st.dataframe(hist[["Fecha", "Calificación", "Rango"]], use_container_width=True)
-        if is_admin:
-            st.write("---")
-            st.write("### 🛠️ Administración de Datos")
-            st.dataframe(st.session_state.db)
-            st.download_button("📥 Descargar Reporte CSV", st.session_state.db.to_csv(index=False), "Reporte_Academia.csv")
+                st.write("**Definición:** Portal de validación para pensionados IMSS.")
+                st.info("💡 **Tip:** Valida rápido para no generar falsas expectativas al cliente.")
+            with st.expander("📋 Requisitos"):
+                st.write("- INE Vigente\n- Correo con acceso a SIPRE\n- WhatsApp activo")
