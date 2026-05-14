@@ -60,28 +60,43 @@ if 'ejercicio_teoria' not in st.session_state:
 if 'ejercicio_practico' not in st.session_state:
     st.session_state.ejercicio_practico = None
 
-# --- LÓGICA DE EJERCICIOS ---
+# --- LÓGICA DE EJERCICIOS EXPANDIDA (EVITA REPETICIONES) ---
 def generar_teoria():
     banco = [
-        {"p": "¿Cómo se llama el cobro de interés sobre el capital pendiente?", "c": ["insoluto", "saldos insolutos", "saldo insoluto"], "r": "Retroalimentación: Los saldos insolutos permiten ahorrar intereses al liquidar antes."},
-        {"p": "¿Qué siglas definen el costo anual total?", "c": ["cat"], "r": "Retroalimentación: El CAT suma tasa, seguros y comisiones."},
-        {"p": "¿Portal para validar capacidad del pensionado IMSS?", "c": ["sipre"], "r": "Retroalimentación: El SIPRE es vital para conocer la capacidad de descuento real."},
-        {"p": "¿Cómo se llama la tasa que no cambia nunca?", "c": ["tasa fija", "fija"], "r": "Retroalimentación: La tasa fija da seguridad al cliente ante la inflación."},
-        {"p": "¿Qué documento oficial vigente es indispensable?", "c": ["ine"], "r": "Retroalimentación: El INE vigente es el requisito número uno."},
-        {"p": "¿Cómo se le llama al dinero neto que recibe el cliente?", "c": ["capital"], "r": "Retroalimentación: El capital es el monto base del préstamo."},
-        {"p": "¿En Consubanco cobramos intereses sobre intereses? (Si/No)", "c": ["no", "falso"], "r": "Retroalimentación: No aplicamos interés compuesto para proteger al cliente."}
+        {"p": "¿Cómo se llama el cobro de interés sobre el capital pendiente?", "c": ["insoluto", "saldos insolutos", "saldo insoluto"], "r": "Retroalimentación: El interés sobre saldos insolutos premia al cliente que paga a tiempo reduciendo su deuda real."},
+        {"p": "¿Qué siglas definen el Costo Anual Total (incluye tasa, seguros y comisiones)?", "c": ["cat"], "r": "Retroalimentación: El CAT es la herramienta de transparencia para comparar créditos."},
+        {"p": "¿Portal oficial para validar capacidad de descuento del pensionado IMSS?", "c": ["sipre"], "r": "Retroalimentación: El SIPRE es indispensable para evitar rechazos por falta de capacidad."},
+        {"p": "¿Cómo se llama la tasa que garantiza estabilidad y no sube con la inflación?", "c": ["tasa fija", "fija"], "r": "Retroalimentación: La tasa fija es seguridad para el bolsillo del cliente."},
+        {"p": "¿Qué documento oficial vigente es el requisito #1 para el trámite?", "c": ["ine", "identificacion"], "r": "Retroalimentación: Sin INE vigente no hay proceso; valídalo desde el saludo."},
+        {"p": "¿Cómo se le llama al monto neto que efectivamente recibe el cliente?", "c": ["capital"], "r": "Retroalimentación: El capital es el dinero 'líquido' que el cliente usará."},
+        {"p": "¿En Consubanco aplicamos interés compuesto (interés sobre interés)? (Sí/No)", "c": ["no", "falso"], "r": "Retroalimentación: No aplicamos anatocismo, lo cual protege el patrimonio del cliente."},
+        {"p": "¿Documento que detalla el calendario de pagos, seguros y abonos?", "c": ["tabla de amortización", "tabla de amortizacion", "tabla"], "r": "Retroalimentación: La tabla de amortización da certeza sobre la duración del crédito."},
+        {"p": "¿Cómo se llama la capacidad de descuento máxima permitida por ley?", "c": ["capacidad de pago", "capacidad", "descuento maximo"], "r": "Retroalimentación: Cuidar la capacidad de pago asegura la salud financiera del pensionado."},
+        {"p": "¿Qué medio de contacto es vital para el envío de documentos y seguimiento?", "c": ["whatsapp", "celular", "correo"], "r": "Retroalimentación: La agilidad en la comunicación cierra ventas."}
     ]
     return random.choice(banco)
 
 def generar_practico():
-    pago = random.randint(10, 40) * 100
+    # Generación dinámica de valores para evitar repeticiones
+    monto_base = random.randint(5, 50) * 1000
     plazo = random.choice([12, 24, 36, 48, 60, 72, 84, 96])
-    total = pago * plazo
-    return {
-        "p": f"Un cliente tiene un descuento de ${pago:,.0f} a un plazo de {plazo} meses. ¿Cuál es el Monto Total que pagará?",
-        "c": str(total),
-        "r": f"Retroalimentación: Multiplica ${pago:,.0f} x {plazo} meses = ${total:,.0f}."
-    }
+    # Cálculo simulado de pago mensual simple para el ejercicio
+    pago_sugerido = round((monto_base * 1.4) / plazo, 0)
+    monto_total = pago_sugerido * plazo
+    
+    opciones_calc = [
+        {
+            "p": f"CÁLCULO: Si un cliente tiene un descuento mensual de ${pago_sugerido:,.0f} a un plazo de {plazo} meses. ¿Cuál es el Monto Total a pagar?",
+            "c": str(int(monto_total)),
+            "r": f"Retroalimentación: Multiplica Pago (${pago_sugerido:,.0f}) x Plazo ({plazo}) = ${monto_total:,.0f}."
+        },
+        {
+            "p": f"PRÁCTICA: Un crédito de ${monto_total:,.0f} totales se pagará en {plazo} meses. ¿De cuánto es el descuento mensual?",
+            "c": str(int(pago_sugerido)),
+            "r": f"Retroalimentación: Divide Total (${monto_total:,.0f}) / Plazo ({plazo}) = ${pago_sugerido:,.0f}."
+        }
+    ]
+    return random.choice(opciones_calc)
 
 # --- INTERFAZ ---
 st.title("🏦 Academia de Ventas Consubanco")
@@ -115,82 +130,83 @@ else:
     tabs = st.tabs(["📝 Evaluación", "🎙️ Roleplay", "📚 Glosario e Infografías", "🕹️ Centro de Juegos", "📊 Evolución"])
 
     with tabs[0]:
-        st.subheader("Evaluación Dinámica")
-        mod_sel = st.radio("Módulo:", ["Teoría y Conceptos", "Laboratorio de Cálculos"], horizontal=True)
+        st.subheader("Evaluación Dinámica de Conocimientos")
+        mod_sel = st.radio("Módulo de aprendizaje:", ["Teoría y Conceptos", "Laboratorio de Cálculos"], horizontal=True)
+        
         if mod_sel == "Teoría y Conceptos":
-            if st.button("Generar Pregunta Teórica") or st.session_state.ejercicio_teoria is None:
+            if st.button("Generar Nueva Pregunta Teórica") or st.session_state.ejercicio_teoria is None:
                 st.session_state.ejercicio_teoria = generar_teoria()
             ej = st.session_state.ejercicio_teoria
         else:
-            if st.button("Generar Ejercicio de Cálculo") or st.session_state.ejercicio_practico is None:
+            if st.button("Generar Nuevo Ejercicio de Cálculo") or st.session_state.ejercicio_practico is None:
                 st.session_state.ejercicio_practico = generar_practico()
             ej = st.session_state.ejercicio_practico
         
         st.info(ej["p"])
-        resp = st.text_input("Tu respuesta:", key=f"ans_{mod_sel}").strip().lower()
-        if st.button("Validar"):
+        resp = st.text_input("Escribe tu respuesta aquí:", key=f"ans_{mod_sel}").strip().lower()
+        
+        if st.button("Validar Respuesta"):
             correctas = ej["c"]
+            # Soporte para validación flexible de texto o números
             es_valida = resp in correctas if isinstance(correctas, list) else resp == correctas
+            
             if es_valida:
-                st.success("¡Correcto!")
+                st.success("¡Excelente! Respuesta correcta.")
                 calif = 10.0
             else:
-                st.error("Incorrecto.")
+                st.error("Respuesta incorrecta.")
                 st.warning(ej["r"])
                 calif = 0.0
+            
             log = {"Nombre": nombre_raw, "Nivel": nivel, "Calificación": calif, "Intentos": len(hist)+1, "Rango": rango, "Fecha": datetime.datetime.now().strftime("%d/%m/%Y %H:%M")}
             st.session_state.db = pd.concat([st.session_state.db, pd.DataFrame([log])], ignore_index=True)
             guardar_datos(st.session_state.db)
 
-    # --- CORRECCIÓN EN EL ANÁLISIS MÉTODO B ---
     with tabs[1]:
-        st.subheader("🎙️ Análisis Método B")
-        speech = st.text_area("Pega tu speech aquí:", height=150)
+        st.subheader("🎙️ Análisis Método B (Speech)")
+        speech = st.text_area("Pega tu speech de venta aquí:", height=150)
         if st.button("Analizar Speech"):
             t = speech.lower()
             errs = []
+            if not any(x in t for x in ["hola", "buen", "presento"]): errs.append("- Falta saludo o presentación inicial.")
+            if not any(x in t for x in ["monto", "pago", "pesos", "$", "000"]): errs.append("- Falta la oferta económica clara.")
+            if "consubanco" not in t: errs.append("- Olvidaste mencionar el respaldo de Consubanco.")
             
-            # Validación de Saludo
-            if not any(x in t for x in ["hola", "buen", "buenos días", "buenas tardes"]): 
-                errs.append("- 🚩 Falta un saludo profesional inicial.")
-            
-            # Validación de Oferta Económica (MEJORADA)
-            # Ahora busca palabras clave O símbolos de dinero/números de miles
-            tiene_oferta = any(x in t for x in ["monto", "pago", "descuento", "$", "pesos", "000"])
-            if not tiene_oferta: 
-                errs.append("- 🚩 Falta mencionar la oferta económica o condiciones del crédito.")
-            
-            # Validación de Marca
-            if "consubanco" not in t: 
-                errs.append("- 🚩 Es vital mencionar el respaldo de Consubanco.")
-            
-            if not errs: 
-                st.success("¡Excelente! Tu speech cumple con los pilares del Método B.")
+            if not errs: st.success("¡Speech Profesional! Cumple con los pilares del Método B.")
             else: 
-                st.error("Retroalimentación de Speech:")
+                st.error("Puntos a mejorar en tu speech:")
                 for e in errs: st.write(e)
 
     with tabs[2]:
-        st.subheader("📚 Glosario con Tips de Venta")
+        st.subheader("📚 Glosario Completo y Tips de Venta")
         c1, c2 = st.columns(2)
         with c1:
-            with st.expander("📌 Capital"):
-                st.write("Monto neto prestado.")
-                st.info("💡 Tip: Explicar que el pago a capital reduce el interés futuro.")
-            with st.expander("📌 CAT"):
-                st.write("Costo Anual Total.")
-                st.info("💡 Tip: Transparencia total vs competencia.")
+            with st.expander("📌 Capital (El dinero real)"):
+                st.write("**Definición:** El monto neto que se entrega al cliente.")
+                st.info("💡 **Tip de Venta:** Recuérdale al cliente que sus abonos bajan esta deuda base directamente.")
+            with st.expander("📌 CAT (Costo Anual Total)"):
+                st.write("**Definición:** Indicador que suma tasa, seguros y comisiones.")
+                st.info("💡 **Tip de Venta:** Úsalo para demostrar que no hay cobros ocultos; todo está en el CAT.")
+            with st.expander("📌 Tasa Fija"):
+                st.write("**Definición:** Interés que permanece igual toda la vida del crédito.")
+                st.success("✅ **Tip de Venta:** Ideal para tiempos de inflación: 'Su pago no subirá pase lo que pase'.")
         with c2:
             with st.expander("📌 Saldos Insolutos"):
-                st.write("Interés sobre el saldo pendiente.")
-                st.info("💡 Tip: Ideal para clientes que quieren liquidar antes.")
-            with st.expander("📌 Tasa Fija"):
-                st.success("✅ Tip: El descuento no sube nunca.")
+                st.write("**Definición:** Interés calculado sobre el remanente de la deuda.")
+                st.info("💡 **Tip de Venta:** El mejor gancho para quien quiere liquidar antes y ahorrar intereses.")
+            with st.expander("📌 SIPRE (Validación IMSS)"):
+                st.write("**Definición:** Sistema de validación de capacidad para pensionados.")
+                st.info("💡 **Tip de Venta:** 'Validamos en minutos para que se vaya con la seguridad de su aprobación'.")
+            with st.expander("📋 Requisitos Indispensables"):
+                st.write("- INE Vigente (Frente y Vuelta)\n- Acceso a SIPRE (Pensionados)\n- WhatsApp para agilidad")
 
     with tabs[4]:
-        st.subheader("📊 Historial")
+        st.subheader("📊 Historial de Aprendizaje")
         st.dataframe(hist[["Fecha", "Calificación", "Rango"]], use_container_width=True)
         if is_admin:
-            st.write("### Panel Administrador")
+            st.write("---")
+            st.write("### Panel de Control (Admin)")
+            st.dataframe(st.session_state.db)
+            st.download_button("📥 Exportar Reporte Global (CSV)", st.session_state.db.to_csv(index=False), "Reporte_Academia.csv")
             st.dataframe(st.session_state.db)
             st.download_button("📥 Exportar CSV", st.session_state.db.to_csv(index=False), "Reporte_Academia.csv")
