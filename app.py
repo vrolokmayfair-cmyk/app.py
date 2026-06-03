@@ -178,7 +178,6 @@ else:
                 for e in errs: st.write(e)
 
     with tabs[2]:
-        # --- APARTADO INTEGRADO: CARACTERÍSTICAS, VENTAJAS, BENEFICIOS Y OBJECIONES ---
         st.subheader("📊 Matriz de Producto Consubanco")
         
         col_c, col_v, col_b = st.columns(3)
@@ -223,17 +222,17 @@ else:
         with o1:
             with st.expander("🗣️ Objeción: 'No me interesa, gracias'"):
                 st.write("**Estrategia:** Rompe el hielo validando su postura y reenfocando el beneficio.")
-                st.info("💡 **Speech Sugerido:** *'Lo entiendo perfectamente, Don/Doña [Nombre]. Precisamente le llamo porque no busco venderle un servicio tradicional, sino informarle de un beneficio exclusivo en efectivo que ya tiene autorizado por ser pensionado, sin consultar buró ni pedir aval.'*")
+                st.info("💡 **Speech Sugerido:** *'Lo entiendo perfectamente, Señor/Señora [Apellido]. Precisamente le llamo porque no busco venderle un servicio tradicional, sino informarle de un beneficio exclusivo en efectivo que ya tiene autorizado por ser pensionado, sin consultar buró ni pedir aval.'*")
             with st.expander("🗣️ Objeción: '¿Me van a revisar Buró de Crédito?'"):
                 st.write("**Estrategia:** Convierte el miedo en una ventaja absoluta de Consubanco.")
-                st.success("✅ **Speech Sugerido:** *'Despreocúpese por completo. Una de nuestras mayores ventajas competitivas es que NO tomamos en cuenta el historial del Buró para otorgarle su dinero en efectivo.'*")
+                st.success("✅ **Speech Sugerido:** *'Despreocúpese por completo, Señor/Señora. Una de nuestras mayores ventajas competitivas es que NO tomamos en cuenta el historial del Buró para otorgarle su dinero en efectivo.'*")
         with o2:
             with st.expander("🗣️ Objeción: 'Tengo desconfianza de los trámites digitales'"):
                 st.write("**Estrategia:** Apóyate en el respaldo institucional y la comodidad del proceso.")
-                st.info("💡 **Speech Sugerido:** *'Comprendo su cuidado y hace muy bien. Consubanco es una institución bancaria totalmente regulada. El trámite digital está diseñado para su comodidad, protegiendo sus datos personales mediante WhatsApp oficial y directo, evitándole dar vueltas o hacer filas innecesarias.'*")
+                st.info("💡 **Speech Sugerido:** *'Comprendo su cuidado, Señor/Señora, y hace muy bien. Consubanco es una institución bancaria totalmente regulada. El trámite digital está diseñado para su comodidad, protegiendo sus datos personales mediante WhatsApp oficial y directo, evitándole dar vueltas o hacer filas innecesarias.'*")
             with st.expander("🗣️ Objeción: '¿Y si quiero pagar antes de tiempo?'"):
                 st.write("**Estrategia:** Destaca los saldos insolutos y la flexibilidad del contrato.")
-                st.info("💡 **Speech Sugerido:** *'Eso es lo mejor de nuestro esquema. Usted cuenta con el beneficio de liquidación anticipada y abonos voluntarios sin penalización. Al manejarse bajo saldos insolutos, el interés solo se cobra sobre el dinero pendiente, lo que le permite ahorrar muchísimo si decide pagar antes.'*")
+                st.info("💡 **Speech Sugerido:** *'Eso es lo mejor de nuestro esquema, Señor/Señora. Usted cuenta con el beneficio de liquidación anticipada y abonos voluntarios sin penalización. Al manejarse bajo saldos insolutos, el interés solo se cobra sobre el dinero pendiente, lo que le permite ahorrar muchísimo si decide pagar antes.'*")
 
         st.markdown("---")
         st.subheader("📚 Glosario y Conceptos Técnicos")
