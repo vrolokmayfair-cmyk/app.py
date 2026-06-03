@@ -38,6 +38,9 @@ st.markdown(f"""
         border: 1px solid {COLOR_AZUL}; margin-bottom: 20px;
     }}
     h1, h2, h3 {{ color: {COLOR_AZUL}; font-family: 'Arial'; }}
+    .cvb-header {{
+        padding: 10px; color: white; font-weight: bold; text-align: center; border-radius: 5px; margin-bottom: 10px;
+    }}
     </style>
     """, unsafe_allow_html=True)
 
@@ -77,10 +80,8 @@ def generar_teoria():
     return random.choice(banco)
 
 def generar_practico():
-    # Generación dinámica de valores para evitar repeticiones
     monto_base = random.randint(5, 50) * 1000
     plazo = random.choice([12, 24, 36, 48, 60, 72, 84, 96])
-    # Cálculo simulado de pago mensual simple para el ejercicio
     pago_sugerido = round((monto_base * 1.4) / plazo, 0)
     monto_total = pago_sugerido * plazo
     
@@ -147,7 +148,6 @@ else:
         
         if st.button("Validar Respuesta"):
             correctas = ej["c"]
-            # Soporte para validación flexible de texto o números
             es_valida = resp in correctas if isinstance(correctas, list) else resp == correctas
             
             if es_valida:
@@ -178,7 +178,65 @@ else:
                 for e in errs: st.write(e)
 
     with tabs[2]:
-        st.subheader("📚 Glosario Completo y Tips de Venta")
+        # --- APARTADO INTEGRADO: CARACTERÍSTICAS, VENTAJAS, BENEFICIOS Y OBJECIONES ---
+        st.subheader("📊 Matriz de Producto Consubanco")
+        
+        col_c, col_v, col_b = st.columns(3)
+        with col_c:
+            st.markdown("<div class='cvb-header' style='background-color:#002D72;'>01. Características</div>", unsafe_allow_html=True)
+            st.markdown("""
+            *   **Crédito personal**
+            *   **No es adelanto** de dinero
+            *   **Dinero en efectivo** disponible
+            *   **Contrato personalizado** a la medida del cliente
+            """, unsafe_allow_html=True)
+            
+        with col_v:
+            st.markdown("<div class='cvb-header' style='background-color:#FF6600;'>02. Ventajas</div>", unsafe_allow_html=True)
+            st.markdown("""
+            *   **No se revisa buró** de crédito
+            *   **Sin aval** o garantías prendarias
+            *   **Documentación sencilla** e inmediata
+            *   **Tasa fija** durante todo el plazo
+            *   **Descuento vía nómina** automatizado
+            *   **Autorización ágil** en un periodo de **24 a 72 hrs**
+            *   Con opción a un **segundo crédito**
+            *   Con opción a un **refinanciamiento** efectivo
+            *   **No es hereditario** (cuenta con seguro)
+            *   Permite **liquidación anticipada**
+            *   Permite **abonar voluntariamente** a capital
+            """, unsafe_allow_html=True)
+            
+        with col_b:
+            st.markdown("<div class='cvb-header' style='background-color:#8A95A5;'>03. Beneficios</div>", unsafe_allow_html=True)
+            st.markdown("""
+            *   **Comodidad:** Sin tener que ir al banco a realizar filas para pagar.
+            *   **Tranquilidad:** Descuentos programados directos sin presiones de cobranza.
+            *   **Seguridad:** Respaldo institucional que protege las finanzas.
+            *   **Trámite digital:** Proceso cómodo, seguro y sin salir de casa.
+            """, unsafe_allow_html=True)
+            
+        st.markdown("---")
+        st.subheader("🛡️ Guía para el Manejo de Objeciones")
+        
+        o1, o2 = st.columns(2)
+        with o1:
+            with st.expander("🗣️ Objeción: 'No me interesa, gracias'"):
+                st.write("**Estrategia:** Rompe el hielo validando su postura y reenfocando el beneficio.")
+                st.info("💡 **Speech Sugerido:** *'Lo entiendo perfectamente, Don/Doña [Nombre]. Precisamente le llamo porque no busco venderle un servicio tradicional, sino informarle de un beneficio exclusivo en efectivo que ya tiene autorizado por ser pensionado, sin consultar buró ni pedir aval.'*")
+            with st.expander("🗣️ Objeción: '¿Me van a revisar Buró de Crédito?'"):
+                st.write("**Estrategia:** Convierte el miedo en una ventaja absoluta de Consubanco.")
+                st.success("✅ **Speech Sugerido:** *'Despreocúpese por completo. Una de nuestras mayores ventajas competitivas es que NO tomamos en cuenta el historial del Buró para otorgarle su dinero en efectivo.'*")
+        with o2:
+            with st.expander("🗣️ Objeción: 'Tengo desconfianza de los trámites digitales'"):
+                st.write("**Estrategia:** Apóyate en el respaldo institucional y la comodidad del proceso.")
+                st.info("💡 **Speech Sugerido:** *'Comprendo su cuidado y hace muy bien. Consubanco es una institución bancaria totalmente regulada. El trámite digital está diseñado para su comodidad, protegiendo sus datos personales mediante WhatsApp oficial y directo, evitándole dar vueltas o hacer filas innecesarias.'*")
+            with st.expander("🗣️ Objeción: '¿Y si quiero pagar antes de tiempo?'"):
+                st.write("**Estrategia:** Destaca los saldos insolutos y la flexibilidad del contrato.")
+                st.info("💡 **Speech Sugerido:** *'Eso es lo mejor de nuestro esquema. Usted cuenta con el beneficio de liquidación anticipada y abonos voluntarios sin penalización. Al manejarse bajo saldos insolutos, el interés solo se cobra sobre el dinero pendiente, lo que le permite ahorrar muchísimo si decide pagar antes.'*")
+
+        st.markdown("---")
+        st.subheader("📚 Glosario y Conceptos Técnicos")
         c1, c2 = st.columns(2)
         with c1:
             with st.expander("📌 Capital (El dinero real)"):
@@ -208,5 +266,3 @@ else:
             st.write("### Panel de Control (Admin)")
             st.dataframe(st.session_state.db)
             st.download_button("📥 Exportar Reporte Global (CSV)", st.session_state.db.to_csv(index=False), "Reporte_Academia.csv")
-            st.dataframe(st.session_state.db)
-            st.download_button("📥 Exportar CSV", st.session_state.db.to_csv(index=False), "Reporte_Academia.csv")
