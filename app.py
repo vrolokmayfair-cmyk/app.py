@@ -63,7 +63,7 @@ if 'ejercicio_teoria' not in st.session_state:
 if 'ejercicio_practico' not in st.session_state:
     st.session_state.ejercicio_practico = None
 
-# --- LÓGICA DE EJERCICIOS EXPANDIDA (EVITA REPETICIONES) ---
+# --- LÓGICA DE EJERCICIOS EXPANDIDA (CON CORRECCIÓN DE WHATSAPP) ---
 def generar_teoria():
     banco = [
         {"p": "¿Cómo se llama el cobro de interés sobre el capital pendiente?", "c": ["insoluto", "saldos insolutos", "saldo insoluto"], "r": "Retroalimentación: El interés sobre saldos insolutos premia al cliente que paga a tiempo reduciendo su deuda real."},
@@ -75,7 +75,8 @@ def generar_teoria():
         {"p": "¿En Consubanco aplicamos interés compuesto (interés sobre interés)? (Sí/No)", "c": ["no", "falso"], "r": "Retroalimentación: No aplicamos anatocismo, lo cual protege el patrimonio del cliente."},
         {"p": "¿Documento que detalla el calendario de pagos, seguros y abonos?", "c": ["tabla de amortización", "tabla de amortizacion", "tabla"], "r": "Retroalimentación: La tabla de amortización da certeza sobre la duración del crédito."},
         {"p": "¿Cómo se llama la capacidad de descuento máxima permitida por ley?", "c": ["capacidad de pago", "capacidad", "descuento maximo"], "r": "Retroalimentación: Cuidar la capacidad de pago asegura la salud financiera del pensionado."},
-        {"p": "¿Qué medio de contacto es vital para el envío de documentos y seguimiento?", "c": ["whatsapp", "celular", "correo"], "r": "Retroalimentación: La agilidad en la comunicación cierra ventas."}
+        # PREGUNTA CORREGIDA: ÚNICAMENTE RESPONDE WHATSAPP
+        {"p": f"¿Qué medio de contacto es vital para el envío de documentos y seguimientos?", "c": ["whatsapp"], "r": "Retroalimentación: El WhatsApp es nuestra herramienta principal y más ágiles para el envío seguro de expedientes y el seguimiento oportuno del trámite."}
     ]
     return random.choice(banco)
 
