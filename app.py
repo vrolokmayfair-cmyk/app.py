@@ -75,51 +75,57 @@ def generar_teoria():
         {"p": "¿En Consubanco aplicamos interés compuesto (interés sobre interés)? (Sí/No)", "c": ["no", "falso"], "r": "Retroalimentación: No aplicamos anatocismo, lo cual protege el patrimonio del cliente."},
         {"p": "¿Documento que detalla el calendario de pagos, seguros y abonos?", "c": ["tabla de amortización", "tabla de amortizacion", "tabla"], "r": "Retroalimentación: La tabla de amortización da certeza sobre la duración del crédito."},
         {"p": "¿Cómo se llama la capacidad de descuento máxima permitida por ley?", "c": ["capacidad de pago", "capacidad", "descuento maximo"], "r": "Retroalimentación: Cuidar la capacidad de pago asegura la salud financiera del pensionado."},
-        {"p": f"¿Qué medio de contacto es vital para el envío de documentos y seguimientos?", "c": ["whatsapp"], "r": "Retroalimentación: El WhatsApp es nuestra herramienta principal y más ágil para el envío seguro de expedientes y el seguimiento oportuno del trámite."}
+        {"p": "¿Qué medio de contacto es vital para el envío de documentos y seguimientos?", "c": ["whatsapp"], "r": "Retroalimentación: El WhatsApp es nuestra herramienta principal y más ágil para el envío seguro de expedientes."}
     ]
     return random.choice(banco)
 
-# --- LABORATORIO DE CÁLCULOS Y OBJECIONES (EXPANDIDO) ---
+# --- LABORATORIO DE CÁLCULOS, TASAS Y OBJECIONES REFORMULADO ---
 def generar_practico():
-    monto_base = random.randint(10, 60) * 1000
+    monto_base = random.randint(15, 70) * 1000
     plazo = random.choice([24, 36, 48, 60, 72, 84])
-    pago_sugerido = round((monto_base * 1.35) / plazo, 0)
-    monto_total = pago_sugerido * plazo
+    # Pago mensual ficticio proveniente del cotizador simulado para el ejercicio de monto total
+    pago_cotizador = round((monto_base * 1.38) / plazo, 0)
+    monto_total = pago_cotizador * plazo
     
     opciones_calc = [
         {
             "tipo": "input",
-            "p": f"🧮 CASO MATEMÁTICO: Un cliente solicita información. Al revisar sus condiciones, notas que su descuento mensual quedará en ${pago_sugerido:,.0f} a un plazo de {plazo} meses. ¿Cuál es el Monto Total exacto que terminará pagando?",
+            "p": f"🧮 CALCULO DE MONTO TOTAL: Tu cotizador arroja que un cliente califica para recibir su capital en efectivo con un descuento mensual exacto de ${pago_cotizador:,.0f} a un plazo fijo de {plazo} meses. ¿Cuál es el Monto Total exacto que debes registrar como valor final que pagará el cliente?",
             "c": str(int(monto_total)),
-            "r": f"Retroalimentación: El cálculo correcto se obtiene multiplicando el pago mensual (${pago_sugerido:,.0f}) por el plazo total ({plazo} meses), lo que nos da un Monto Total de ${monto_total:,.0f}."
-        },
-        {
-            "tipo": "input",
-            "p": f"🧮 CASO MATEMÁTICO: Estás estructurando una propuesta donde el Monto Total contratado es de ${monto_total:,.0f} diferido a un plazo de {plazo} meses. ¿De cuánto será el descuento mensual exacto que debes comunicarle al cliente?",
-            "c": str(int(pago_sugerido)),
-            "r": f"Retroalimentación: Para obtener el pago mensual, debes dividir el Monto Total (${monto_total:,.0f}) entre el número de meses del plazo ({plazo}), resultando en ${pago_sugerido:,.0f} al mes."
+            "r": f"Retroalimentación: El Monto Total que pagará el cliente a lo largo de la vida del crédito se calcula multiplicando el descuento mensual arrojado por tu cotizador (${pago_cotizador:,.0f}) por el número de meses pactados ({plazo}), lo que equivale a ${monto_total:,.0f}."
         },
         {
             "tipo": "radio",
-            "p": f"🛡️ MANEJO DE OBJECIONES: Al presentarle una oferta de ${pago_sugerido:,.0f} mensuales, la Señora Martínez te interrumpe molesta diciendo: 'No me interesa, todas las financieras son fraudes y cobran cosas ocultas'. ¿Cuál es la mejor respuesta institucional usando tus herramientas de venta?",
+            "p": f"🛡️ MANEJO DE OBJECIONES: Al presentarle una propuesta de crédito de nómina, el Señor López te comenta preocupado: 'Sé que los intereses en México están subiendo mucho por las noticias, no quiero que mi descuento mensual empiece a cambiar de precio el próximo año'. ¿Cómo manejas esta situación utilizando las condiciones de nuestra tasa de interés?",
             "options": [
-                "Explicarle detalladamente que somos un banco regulado y que si no confía puede revisar el contrato directamente en la sucursal más cercana.",
-                "Aplicar empatía y reenfocar usando el CAT: 'Comprendo perfectamente su cuidado, Señora Martínez. Precisamente por seguridad, en Consubanco somos un banco regulado y le garantizamos transparencia absoluta a través de su CAT (Costo Anual Total), donde se incluye todo desde el primer día sin letras chiquitas.'",
-                "Decirle que no se preocupe, que no le cobraremos nada hasta que firme y vea que todo es legal."
+                "Decirle que no se preocupe, que si la tasa llega a subir nosotros le avisamos por WhatsApp antes de aplicar el descuento.",
+                "Darle certeza con la Tasa Fija: 'Lo entiendo y es una excelente preocupación, Señor López. Con Consubanco tiene tranquilidad total, ya que operamos con una Tasa Fija. Esto significa que su descuento mensual de hoy será exactamente el mismo hasta el último mes de su crédito, sin importar la inflación o los cambios en la economía.'",
+                "Explicarle que el descuento se calcula de acuerdo al portal SIPRE y que por ley la tasa no se puede modificar una vez cargado el trámite."
             ],
-            "c": "Aplicar empatía y reenfocar usando el CAT: 'Comprendo perfectamente su cuidado, Señora Martínez. Precisamente por seguridad, en Consubanco somos un banco regulado y le garantizamos transparencia absoluta a través de su CAT (Costo Anual Total), donde se incluye todo desde el primer día sin letras chiquitas.'",
-            "r": "Retroalimentación: ¡Excelente elección! Validar la preocupación de la Señora Martínez con empatía y usar el CAT como argumento técnico disuelve el miedo a los cobros ocultos y refuerza la confianza institucional."
+            "c": "Darle certeza con la Tasa Fija: 'Lo entiendo y es una excelente preocupación, Señor López. Con Consubanco tiene tranquilidad total, ya que operamos con una Tasa Fija. Esto significa que su descuento mensual de hoy será exactamente el mismo hasta el último mes de su crédito, sin importar la inflación o los cambios en la economía.'",
+            "r": "Retroalimentación: ¡Excelente! La Tasa Fija es el mejor escudo comercial contra el miedo a la inflación, otorgando seguridad financiera total al Señor López desde el primer momento."
         },
         {
             "tipo": "radio",
-            "p": f"🛡️ MANEJO DE OBJECIONES: Estás cerrando una propuesta de ${monto_base:,.0f} en efectivo. El Señor Rodríguez te dice: 'Me parece bien el pago de ${pago_sugerido:,.0f}, pero me da miedo comprometerme a tantos meses porque si me llega un dinero extra quiero liquidar antes y no quiero penalizaciones'. ¿Cómo manejas esta objeción?",
+            "p": f"🛡️ MANEJO DE OBJECIONES: Una clienta, la Señora Gómez, te dice: 'Me interesa el dinero en efectivo pero otra institución me ofrece una tasa mensual más baja en su publicidad'. Sabiendo que el costo real implica seguros y comisiones integradas, ¿cómo defiendes tu venta utilizando los términos financieros correctos?",
             "options": [
-                "Mencionar que nuestro esquema se maneja bajo Saldos Insolutos: 'Es una excelente estrategia de su parte, Señor Rodríguez. Con nosotros tiene total libertad de realizar abonos voluntarios o liquidar de forma anticipada sin ninguna penalización. Al operar bajo saldos insolutos, el interés se calcula solo sobre lo que debe, ahorrando muchísimo dinero si paga antes.'",
-                "Decirle que los plazos son fijos pero que después del mes 12 puede pedir una reestructura para pagar menos.",
-                "Informarle que por políticas internas no hay penalizaciones pero que le conviene cumplir con todo el plazo para mejorar su historial."
+                "Mencionar que las otras financieras mienten en sus tasas y que la de nosotros es mejor porque se descuenta directo por nómina.",
+                "Reenfocar la venta hacia el CAT: 'Comprendo, Señora Gómez. Muchas instituciones muestran tasas de interés bajas que no reflejan el costo real porque no incluyen comisiones ni seguros obligatorios. En Consubanco somos transparentes: le pedimos comparar el CAT (Costo Anual Total), que incluye absolutamente todo, garantizándole que con nosotros no tendrá sorpresas ni cobros ocultos.'",
+                "Pedirle que le mande una captura de la tabla de amortización de la competencia por WhatsApp para ver si se la podemos igualar."
             ],
-            "c": "Mencionar que nuestro esquema se maneja bajo Saldos Insolutos: 'Es una excelente estrategia de su parte, Señor Rodríguez. Con nosotros tiene total libertad de realizar abonos voluntarios o liquidar de forma anticipada sin ninguna penalización. Al operar bajo saldos insolutos, el interés se calcula solo sobre lo que debe, ahorrando muchísimo dinero si paga antes.'",
-            "r": "Retroalimentación: ¡Correcto! El argumento de los Saldos Insolutos combinado con la política de no penalización por liquidación anticipada es el cierre perfecto para los clientes preocupados por plazos largos."
+            "c": "Reenfocar la venta hacia el CAT: 'Comprendo, Señora Gómez. Muchas instituciones muestran tasas de interés bajas que no reflejan el costo real porque no incluyen comisiones ni seguros obligatorios. En Consubanco somos transparentes: le pedimos comparar el CAT (Costo Anual Total), que incluye absolutamente todo, garantizándole que con nosotros no tendrá sorpresas ni cobros ocultos.'",
+            "r": "Retroalimentación: ¡Es correcto! El CAT es la herramienta legal y técnica idónea para neutralizar argumentos de tasas nominales engañosas de la competencia, demostrando la honestidad de Consubanco."
+        },
+        {
+            "tipo": "radio",
+            "p": f"🛡️ MANEJO DE OBJECIONES: El Señor Sánchez objeta la cotización diciendo: 'El dinero me sirve, pero considero que terminaré pagando una cantidad muy alta sumando todos los meses'. ¿Qué argumento financiero del glosario utilizas para rescatar el cierre?",
+            "options": [
+                "Explicar el beneficio de los Saldos Insolutos: 'Entiendo su punto, Señor Sánchez. Sin embargo, recuerde que nuestro esquema opera bajo Saldos Insolutos. Esto significa que usted tiene el derecho por contrato de realizar abonos voluntarios directos a capital o liquidar el total anticipadamente sin penalización. Al hacerlo, el interés se recalcula solo sobre lo que reste, lo que reduce drásticamente el monto total que pagará.'",
+                "Mencionar que al ser un crédito personalizado el interés compuesto se congela para que no aumente su deuda.",
+                "Decirle que al dividir el monto total entre todo el plazo se dará cuenta de que es una inversión sumamente cómoda y digital."
+            ],
+            "c": "Explicar el beneficio de los Saldos Insolutos: 'Entiendo su punto, Señor Sánchez. Sin embargo, recuerde que nuestro esquema opera bajo Saldos Insolutos. Esto significa que usted tiene el derecho por contrato de realizar abonos voluntarios directos a capital o liquidar el total anticipadamente sin penalización. Al hacerlo, el interés se recalcula solo sobre lo que reste, lo que reduce drásticamente el monto total que pagará.'",
+            "r": "Retroalimentación: ¡Gran cierre! Destacar los Saldos Insolutos le devuelve el control financiero al Señor Sánchez, quitando la percepción de un crédito 'eterno' o impagable."
         }
     ]
     return random.choice(opciones_calc)
