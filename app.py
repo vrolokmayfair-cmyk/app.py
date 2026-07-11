@@ -63,7 +63,7 @@ if 'ejercicio_teoria' not in st.session_state:
 if 'ejercicio_practico' not in st.session_state:
     st.session_state.ejercicio_practico = None
 
-# --- LÓGICA DE EJERCICIOS EXPANDIDA (CON CORRECCIÓN DE WHATSAPP) ---
+# --- LÓGICA DE EJERCICIOS TEÓRICOS ---
 def generar_teoria():
     banco = [
         {"p": "¿Cómo se llama el cobro de interés sobre el capital pendiente?", "c": ["insoluto", "saldos insolutos", "saldo insoluto"], "r": "Retroalimentación: El interés sobre saldos insolutos premia al cliente que paga a tiempo reduciendo su deuda real."},
@@ -75,27 +75,51 @@ def generar_teoria():
         {"p": "¿En Consubanco aplicamos interés compuesto (interés sobre interés)? (Sí/No)", "c": ["no", "falso"], "r": "Retroalimentación: No aplicamos anatocismo, lo cual protege el patrimonio del cliente."},
         {"p": "¿Documento que detalla el calendario de pagos, seguros y abonos?", "c": ["tabla de amortización", "tabla de amortizacion", "tabla"], "r": "Retroalimentación: La tabla de amortización da certeza sobre la duración del crédito."},
         {"p": "¿Cómo se llama la capacidad de descuento máxima permitida por ley?", "c": ["capacidad de pago", "capacidad", "descuento maximo"], "r": "Retroalimentación: Cuidar la capacidad de pago asegura la salud financiera del pensionado."},
-        # PREGUNTA CORREGIDA: ÚNICAMENTE RESPONDE WHATSAPP
-        {"p": f"¿Qué medio de contacto es vital para el envío de documentos y seguimientos?", "c": ["whatsapp"], "r": "Retroalimentación: El WhatsApp es nuestra herramienta principal y más ágiles para el envío seguro de expedientes y el seguimiento oportuno del trámite."}
+        {"p": f"¿Qué medio de contacto es vital para el envío de documentos y seguimientos?", "c": ["whatsapp"], "r": "Retroalimentación: El WhatsApp es nuestra herramienta principal y más ágil para el envío seguro de expedientes y el seguimiento oportuno del trámite."}
     ]
     return random.choice(banco)
 
+# --- LABORATORIO DE CÁLCULOS Y OBJECIONES (EXPANDIDO) ---
 def generar_practico():
-    monto_base = random.randint(5, 50) * 1000
-    plazo = random.choice([12, 24, 36, 48, 60, 72, 84, 96])
-    pago_sugerido = round((monto_base * 1.4) / plazo, 0)
+    monto_base = random.randint(10, 60) * 1000
+    plazo = random.choice([24, 36, 48, 60, 72, 84])
+    pago_sugerido = round((monto_base * 1.35) / plazo, 0)
     monto_total = pago_sugerido * plazo
     
     opciones_calc = [
         {
-            "p": f"CÁLCULO: Si un cliente tiene un descuento mensual de ${pago_sugerido:,.0f} a un plazo de {plazo} meses. ¿Cuál es el Monto Total a pagar?",
+            "tipo": "input",
+            "p": f"🧮 CASO MATEMÁTICO: Un cliente solicita información. Al revisar sus condiciones, notas que su descuento mensual quedará en ${pago_sugerido:,.0f} a un plazo de {plazo} meses. ¿Cuál es el Monto Total exacto que terminará pagando?",
             "c": str(int(monto_total)),
-            "r": f"Retroalimentación: Multiplica Pago (${pago_sugerido:,.0f}) x Plazo ({plazo}) = ${monto_total:,.0f}."
+            "r": f"Retroalimentación: El cálculo correcto se obtiene multiplicando el pago mensual (${pago_sugerido:,.0f}) por el plazo total ({plazo} meses), lo que nos da un Monto Total de ${monto_total:,.0f}."
         },
         {
-            "p": f"PRÁCTICA: Un crédito de ${monto_total:,.0f} totales se pagará en {plazo} meses. ¿De cuánto es el descuento mensual?",
+            "tipo": "input",
+            "p": f"🧮 CASO MATEMÁTICO: Estás estructurando una propuesta donde el Monto Total contratado es de ${monto_total:,.0f} diferido a un plazo de {plazo} meses. ¿De cuánto será el descuento mensual exacto que debes comunicarle al cliente?",
             "c": str(int(pago_sugerido)),
-            "r": f"Retroalimentación: Divide Total (${monto_total:,.0f}) / Plazo ({plazo}) = ${pago_sugerido:,.0f}."
+            "r": f"Retroalimentación: Para obtener el pago mensual, debes dividir el Monto Total (${monto_total:,.0f}) entre el número de meses del plazo ({plazo}), resultando en ${pago_sugerido:,.0f} al mes."
+        },
+        {
+            "tipo": "radio",
+            "p": f"🛡️ MANEJO DE OBJECIONES: Al presentarle una oferta de ${pago_sugerido:,.0f} mensuales, la Señora Martínez te interrumpe molesta diciendo: 'No me interesa, todas las financieras son fraudes y cobran cosas ocultas'. ¿Cuál es la mejor respuesta institucional usando tus herramientas de venta?",
+            "options": [
+                "Explicarle detalladamente que somos un banco regulado y que si no confía puede revisar el contrato directamente en la sucursal más cercana.",
+                "Aplicar empatía y reenfocar usando el CAT: 'Comprendo perfectamente su cuidado, Señora Martínez. Precisamente por seguridad, en Consubanco somos un banco regulado y le garantizamos transparencia absoluta a través de su CAT (Costo Anual Total), donde se incluye todo desde el primer día sin letras chiquitas.'",
+                "Decirle que no se preocupe, que no le cobraremos nada hasta que firme y vea que todo es legal."
+            ],
+            "c": "Aplicar empatía y reenfocar usando el CAT: 'Comprendo perfectamente su cuidado, Señora Martínez. Precisamente por seguridad, en Consubanco somos un banco regulado y le garantizamos transparencia absoluta a través de su CAT (Costo Anual Total), donde se incluye todo desde el primer día sin letras chiquitas.'",
+            "r": "Retroalimentación: ¡Excelente elección! Validar la preocupación de la Señora Martínez con empatía y usar el CAT como argumento técnico disuelve el miedo a los cobros ocultos y refuerza la confianza institucional."
+        },
+        {
+            "tipo": "radio",
+            "p": f"🛡️ MANEJO DE OBJECIONES: Estás cerrando una propuesta de ${monto_base:,.0f} en efectivo. El Señor Rodríguez te dice: 'Me parece bien el pago de ${pago_sugerido:,.0f}, pero me da miedo comprometerme a tantos meses porque si me llega un dinero extra quiero liquidar antes y no quiero penalizaciones'. ¿Cómo manejas esta objeción?",
+            "options": [
+                "Mencionar que nuestro esquema se maneja bajo Saldos Insolutos: 'Es una excelente estrategia de su parte, Señor Rodríguez. Con nosotros tiene total libertad de realizar abonos voluntarios o liquidar de forma anticipada sin ninguna penalización. Al operar bajo saldos insolutos, el interés se calcula solo sobre lo que debe, ahorrando muchísimo dinero si paga antes.'",
+                "Decirle que los plazos son fijos pero que después del mes 12 puede pedir una reestructura para pagar menos.",
+                "Informarle que por políticas internas no hay penalizaciones pero que le conviene cumplir con todo el plazo para mejorar su historial."
+            ],
+            "c": "Mencionar que nuestro esquema se maneja bajo Saldos Insolutos: 'Es una excelente estrategia de su parte, Señor Rodríguez. Con nosotros tiene total libertad de realizar abonos voluntarios o liquidar de forma anticipada sin ninguna penalización. Al operar bajo saldos insolutos, el interés se calcula solo sobre lo que debe, ahorrando muchísimo dinero si paga antes.'",
+            "r": "Retroalimentación: ¡Correcto! El argumento de los Saldos Insolutos combinado con la política de no penalización por liquidación anticipada es el cierre perfecto para los clientes preocupados por plazos largos."
         }
     ]
     return random.choice(opciones_calc)
@@ -139,13 +163,20 @@ else:
             if st.button("Generar Nueva Pregunta Teórica") or st.session_state.ejercicio_teoria is None:
                 st.session_state.ejercicio_teoria = generar_teoria()
             ej = st.session_state.ejercicio_teoria
+            
+            st.info(ej["p"])
+            resp = st.text_input("Escribe tu respuesta aquí:", key="ans_teoria").strip().lower()
+            
         else:
-            if st.button("Generar Nuevo Ejercicio de Cálculo") or st.session_state.ejercicio_practico is None:
+            if st.button("Generar Nuevo Ejercicio Práctico (Cálculo / Objeción)") or st.session_state.ejercicio_practico is None:
                 st.session_state.ejercicio_practico = generar_practico()
             ej = st.session_state.ejercicio_practico
-        
-        st.info(ej["p"])
-        resp = st.text_input("Escribe tu respuesta aquí:", key=f"ans_{mod_sel}").strip().lower()
+            
+            st.info(ej["p"])
+            if ej["tipo"] == "input":
+                resp = st.text_input("Escribe tu respuesta numérica aquí (sin comas ni signos):", key="ans_practico_in").strip().lower()
+            else:
+                resp = st.radio("Selecciona la mejor opción de Speech Profesional:", ej["options"], key="ans_practico_rad")
         
         if st.button("Validar Respuesta"):
             correctas = ej["c"]
