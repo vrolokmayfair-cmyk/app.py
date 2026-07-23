@@ -44,7 +44,13 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- FUNCIONES DE DATOS ---
+# --- FUNCIONES DE AUXILIARES Y DATOS ---
+def limpiar_cifra_numerica(texto: str) -> str:
+    """Limpia la entrada del usuario eliminando comas, puntos, signos $ y espacios."""
+    if not texto:
+        return ""
+    return texto.replace(",", "").replace(".", "").replace("$", "").replace(" ", "").strip()
+
 def cargar_datos():
     if os.path.exists(DB_FILE):
         try: return pd.read_csv(DB_FILE)
@@ -158,7 +164,6 @@ def generar_teoria():
         }
     ]
     
-    # Selecciona un concepto al azar y una forma de preguntar al azar -> Más de 100 combinaciones posibles
     item = random.choice(conceptos)
     pregunta_texto = random.choice(item["preguntas"])
     return {
@@ -273,7 +278,8 @@ else:
             ej = st.session_state.ejercicio_teoria
             
             st.info(ej["p"])
-            resp = st.text_input("Escribe tu respuesta aquí:", key="ans_teoria").strip().lower()
+            resp_raw = st.text_input("Escribe tu respuesta aquí:", key="ans_teoria").strip().lower()
+            resp = resp_raw
             
         else:
             if st.button("Generar Nuevo Caso Práctico (Cálculo / Objeción)") or st.session_state.ejercicio_practico is None:
@@ -282,7 +288,9 @@ else:
             
             st.info(ej["p"])
             if ej["tipo"] == "input":
-                resp = st.text_input("Escribe tu respuesta numérica aquí (solo números enteros, sin signos ni comas):", key="ans_practico_in").strip().lower()
+                resp_raw = st.text_input("Escribe tu respuesta numérica aquí (puedes usar comas como 92,400 o escribirlo directo 92400):", key="ans_practico_in")
+                # Limpiamos comas, puntos o signos para permitir cualquier formato numérico
+                resp = limpiar_cifra_numerica(resp_raw)
             else:
                 resp = st.radio("Selecciona la mejor opción de Speech Profesional para el manejo de la llamada:", ej["options"], key="ans_practico_rad")
         
@@ -395,7 +403,7 @@ else:
                 st.write("**Definición:** Sistema de validación de capacidad para pensionados.")
                 st.info("💡 **Tip de Venta:** 'Validamos en minutos para que se vaya con la seguridad de su aprobación'.")
             with st.expander("📋 Requisitos Indispensables"):
-                st.write("- INE Vigente (Frente y Vuelta)\n- Accesso a SIPRE (Pensionados)\n- WhatsApp para agilidad")
+                st.write("- INE Vigente (Frente y Vuelta)\n- Acceso a SIPRE (Pensionados)\n- WhatsApp para agilidad")
 
     with tabs[4]:
         st.subheader("📊 Historial de Aprendizaje")
