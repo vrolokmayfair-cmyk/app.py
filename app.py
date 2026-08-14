@@ -44,7 +44,7 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- FUNCIONES DE AUXILIARES Y DATOS ---
+# --- FUNCIONES AUXILIARES Y DATOS ---
 def limpiar_cifra_numerica(texto: str) -> str:
     """Limpia la entrada del usuario eliminando comas, puntos, signos $ y espacios."""
     if not texto:
@@ -69,7 +69,7 @@ if 'ejercicio_teoria' not in st.session_state:
 if 'ejercicio_practico' not in st.session_state:
     st.session_state.ejercicio_practico = None
 
-# --- BANCO TEÓRICO EXPANDIDO (+100 VARIACIONES AL AZAR) ---
+# --- BANCO TEÓRICO EXPANDIDO ---
 def generar_teoria():
     conceptos = [
         {
@@ -172,7 +172,7 @@ def generar_teoria():
         "r": item["r"]
     }
 
-# --- LABORATORIO DE CÁLCULOS Y OBJECIONES EXPANDIDO (+100 VARIACIONES AL AZAR) ---
+# --- LABORATORIO DE CÁLCULOS Y OBJECIONES ---
 def generar_practico():
     nombres_clientes = ["Martínez", "Rodríguez", "Hernández", "García", "López", "González", "Pérez", "Ramírez", "Flores", "Sánchez"]
     apodo = random.choice(nombres_clientes)
@@ -237,7 +237,7 @@ def generar_practico():
     
     return random.choice(banco_practicos)
 
-# --- INTERFAZ ---
+# --- INTERFAZ STREAMLIT ---
 st.title("🏦 Academia de Ventas Consubanco")
 
 with st.sidebar:
@@ -289,7 +289,6 @@ else:
             st.info(ej["p"])
             if ej["tipo"] == "input":
                 resp_raw = st.text_input("Escribe tu respuesta numérica aquí (puedes usar comas como 92,400 o escribirlo directo 92400):", key="ans_practico_in")
-                # Limpiamos comas, puntos o signos para permitir cualquier formato numérico
                 resp = limpiar_cifra_numerica(resp_raw)
             else:
                 resp = st.radio("Selecciona la mejor opción de Speech Profesional para el manejo de la llamada:", ej["options"], key="ans_practico_rad")
@@ -364,7 +363,7 @@ else:
             """, unsafe_allow_html=True)
             
         st.markdown("---")
-        st.subheader("🛡️ Guía para el Manejo de Objeciones")
+        st.subheader("🛡️ Guía para el Manejo de Objeciones Generales")
         
         o1, o2 = st.columns(2)
         with o1:
@@ -382,6 +381,65 @@ else:
                 st.write("**Estrategia:** Destaca los saldos insolutos y la flexibilidad del contrato.")
                 st.info("💡 **Speech Sugerido:** *'Eso es lo mejor de nuestro esquema, Señor/Señora. Usted cuenta con el beneficio de liquidación anticipada y abonos voluntarios sin penalización. Al manejarse bajo saldos insolutos, el interés solo se cobra sobre el dinero pendiente, lo que le permite ahorrar muchísimo si decide pagar antes.'*")
 
+        # --- SECCIÓN INTEGRADA: PROGRAMA LAZOS CONSUBANCO 2026 ---
+        st.markdown("---")
+        st.subheader("🤝 Programa Lazos Consubanco 2026 - Apertura de Cuenta")
+        
+        col_lazos1, col_lazos2 = st.columns(2)
+        
+        with col_lazos1:
+            with st.expander("🏛️ Respaldo Institucional y Soluciones Financieras", expanded=True):
+                st.markdown("""
+                *   **Experiencia:** Banco regulado y supervisado por la CNBV desde 2012, con más de 25 años de experiencia financiera y presencia nacional[cite: 1].
+                *   **Trayectoria:** Más de 1.5 millones de créditos otorgados; #4 en colocación de créditos personales[cite: 1].
+                *   **Cuenta de Débito Digital:** Proceso rápido, seguro y 100% digital, sin monto mínimo de apertura ni saldo promedio requerido[cite: 1].
+                *   **Inversión en Pagaré:** Tasa y plazo fijo de 1 a 720 días, respaldada por el IPAB hasta por 400,000 UDIs por cliente[cite: 1].
+                *   **Pensiona Plus:** Diseñado para mejorar hasta 3 veces más el monto de la pensión en promedio[cite: 1].
+                """)
+                
+            with st.expander("🎁 Beneficios Exclusivos Lazos para el Cliente"):
+                st.markdown("""
+                *   **Bono de Bienvenida:** Bono único de bienvenida por $1,000 MXN[cite: 1].
+                *   **Reembolso en Retiros:** Hasta $60 MXN de reembolso mensual por retiros en efectivo[cite: 1].
+                *   **Bonificación Chedraui:** $50 MXN por cada $500 MXN de compra en tienda y farmacia Chedraui (bonificados en monedero)[cite: 1].
+                *   **Rendimiento en Saldo a la Vista:** De 3% a 5% de rendimiento por saldo a la vista[cite: 1].
+                *   **Inversiones Digitales:** De 9% a 10% de rendimiento en inversiones digitales desde 84 días[cite: 1].
+                *   **Descuentos Médicos:** 20% de descuento en Laboratorios Médicos del Chopo[cite: 1].
+                *   **Retiros y Servicios:** Más de 84 mil puntos de retiro en el país, además de pago de servicios (Luz, Agua) y descuentos en entretenimiento[cite: 1].
+                """)
+
+        with col_lazos2:
+            with st.expander("📝 Requisitos y Recomendaciones de Apertura", expanded=True):
+                st.markdown("""
+                **Requisitos Principales:**
+                1. Tener un crédito con Consubanco[cite: 1].
+                2. Realizar la apertura de la Cuenta de Débito Digital[cite: 1].
+                3. Portabilidad de Nómina / Pensión[cite: 1].
+
+                **Recomendaciones para el Proceso:**
+                1. **Uso Exclusivo:** El proceso debe realizarse desde el celular personal del cliente[cite: 1].
+                2. **Documentación:** INE vigente. Si no tiene domicilio o no coincide, presentar comprobante (TELMEX o CFE) menor a 3 meses y conocer su RFC con homocLave[cite: 1].
+                3. **Captura de Datos:** Capturar los datos exactamente como aparecen en la identificación oficial, sin cambios ni errores[cite: 1].
+                4. **Fotos Claras:** Estar en un lugar bien iluminado para la toma de fotografías[cite: 1].
+                5. **Activación TDD:** La Tarjeta de Débito se activa desde la aplicación de Consubanco[cite: 1].
+                6. **Soporte:** En caso de ayuda, comunicarse con un ejecutivo a Consulínea[cite: 1].
+                """)
+
+            with st.expander("🛡️ Manejo de Objeciones Específicas - Programa Lazos"):
+                st.markdown("""
+                **1. "No conozco el banco"**
+                * *Respuesta:* Consubanco es una institución de banca múltiple con más de 20 años de experiencia, consolidada desde 2012[cite: 1]. Ofrecemos créditos con descuento vía nómina, Consucuenta Digital, Consubanco App, seguro de vida y asistencias[cite: 1]. Puede verificar la trayectoria en `www.consubanco.com`[cite: 1].
+
+                **2. "No tienen sucursales físicas para resolver dudas"**
+                * *Respuesta:* Somos un banco digital, lo que nos permite ofrecer mejores beneficios[cite: 1]. Gestiones como consultas, transferencias y aclaraciones se realizan de forma cómoda en la Consubanco App[cite: 1]. ¡La sucursal está al alcance de sus manos[cite: 1]!
+
+                **3. "Se me dificulta ir a un Oxxo y solo retirar parte de mi nómina"**
+                * *Respuesta:* Además de Oxxo (con límite de $3,000 MXN por transacción), puede retirar en la red de cajeros VISA y tiendas como Chedraui y Farmacias Guadalajara[cite: 1]. También cuenta con transferencias SPEI 24/7 sin costo desde la App[cite: 1].
+
+                **4. "Las tiendas Oxxo no tienen dinero suficiente para montos altos"**
+                * *Respuesta:* Para montos de pensión altos, establecimientos como Chedraui, Farmacias Guadalajara y la red de cajeros VISA cuentan con mayor disponibilidad de efectivo[cite: 1]. También puede realizar pagos y transferencias directo desde su App[cite: 1].
+                """)
+
         st.markdown("---")
         st.subheader("📚 Glosario y Conceptos Técnicos")
         c1, c2 = st.columns(2)
@@ -397,7 +455,7 @@ else:
                 st.success("✅ **Tip de Venta:** Ideal para tiempos de inflación: 'Su pago no subirá pase lo que pase'.")
         with c2:
             with st.expander("📌 Saldos Insolutos"):
-                st.write("**Definición:** Interés calculado sobre el remanente de la deuda.")
+                st.write("**Definición:** Interés calculated sobre el remanente de la deuda.")
                 st.info("💡 **Tip de Venta:** El mejor gancho para quien quiere liquidar antes y ahorrar intereses.")
             with st.expander("📌 SIPRE (Validación IMSS)"):
                 st.write("**Definición:** Sistema de validación de capacidad para pensionados.")
