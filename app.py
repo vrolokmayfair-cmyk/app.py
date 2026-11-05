@@ -1,18 +1,24 @@
+import io
 import pandas as pd
+import streamlit as st
 
-def cargar_base_tipificaciones(filepath='Copia de Tipificaciones V6 (1).xlsx'):
+# ==========================================
+# 1. CARGA DE ARCHIVO (LOCAL / UPLOAD EN STREAMLIT)
+# ==========================================
+def cargar_base_tipificaciones(file_input):
     """
-    Carga las hojas existentes del libro de Excel original.
+    Carga las hojas existentes. Soporta una ruta de archivo (str)
+    o un archivo subido a través de st.file_uploader.
     """
-    xls = pd.ExcelFile(filepath)
+    xls = pd.ExcelFile(file_input)
     hojas = {}
     for sheet_name in xls.sheet_names:
-        hojas[sheet_name] = pd.read_excel(filepath, sheet_name=sheet_name)
+        hojas[sheet_name] = pd.read_excel(xls, sheet_name=sheet_name)
     return hojas
 
 
 # ==========================================
-# MÓDULO 1: SCRIPTS Y ROLEPLAY (INTEGRADO)
+# 2. MÓDULO ROLEPLAY Y SCRIPTS
 # ==========================================
 SCRIPTS_ROLEPLAY = {
     "Script_A_Apertura_y_Objeciones": {
@@ -46,7 +52,7 @@ SCRIPTS_ROLEPLAY = {
 
 
 # ==========================================
-# MÓDULO 2: COTIZADOR 4918 IMSS PENSIONADOS
+# 3. MÓDULO COTIZADOR 4918 IMSS PENSIONADOS
 # ==========================================
 PARAMETROS_COTIZADOR_4918 = {
     "Convenio": "OPC IMSS PENSIONADOS",
@@ -61,7 +67,6 @@ PARAMETROS_COTIZADOR_4918 = {
     "Plazos_Meses": [60, 54, 48, 36, 24, 12]
 }
 
-# Tabla de Muestra Representativa del Material 4918
 TABLA_COTIZACION_4918_DF = pd.DataFrame([
     {"Monto": 5000.00,   "Tasa_%": 31.89, "CAT_%": 37.0, "60_Meses": 183.89,   "54_Meses": 191.27,   "48_Meses": 200.93,   "36_Meses": 231.87,   "24_Meses": 297.88,   "12_Meses": 504.80},
     {"Monto": 10000.00,  "Tasa_%": 31.89, "CAT_%": 37.0, "60_Meses": 367.78,   "54_Meses": 382.53,   "48_Meses": 401.87,   "36_Meses": 463.73,   "24_Meses": 595.77,   "12_Meses": 1009.61},
@@ -77,24 +82,22 @@ TABLA_COTIZACION_4918_DF = pd.DataFrame([
 
 
 # ==========================================
-# EXPORTACIÓN E INTEGRACIÓN A EXCEL COMPLETO
+# 4. GENERACIÓN DE ARCHIVO EN MEMORIA
 # ==========================================
-def guardar_sistema_actualizado(filepath_original='Copia de Tipificaciones V6 (1).xlsx',
-                                filepath_salida='Tipificaciones_Con_Cotizador_y_Roleplay.xlsx'):
+def generar_excel_en_memoria(hojas_base):
     """
-    Consolida las hojas originales y añade las nuevas pestañas de Cotizador y Roleplay.
+    Genera el archivo Excel completo en un buffer de memoria BytesIO.
     """
-    hojas_existentes = cargar_base_tipificaciones(filepath_original)
-
-    with pd.ExcelWriter(filepath_salida, engine='openpyxl') as writer:
-        # 1. Copiar hojas originales exactamente como están
-        for nombre_hoja, df_hoja in hojas_existentes.items():
-            df_hoja.to_excel(writer, sheet_name=nombre_hoja, index=False)
+    output = io.BytesIO()
+    with pd.ExcelWriter(output, engine='openpyxl') as writer:
+        # Copiar hojas base si existen
+        if hojas_base:
+            for nombre_hoja, df_hoja in hojas_base.items():
+                df_hoja.to_excel(writer, sheet_name=nombre_hoja, index=False)
         
-        # 2. Agregar nueva pestaña de Cotizador (Material 4918)
+        # Agregar pestañas adicionales
         TABLA_COTIZACION_4918_DF.to_excel(writer, sheet_name='Cotizador 4918 IMSS', index=False)
 
-        # 3. Agregar nueva pestaña de Roleplay & Scripts
         scripts_rows = []
         for script_name, dialogo in SCRIPTS_ROLEPLAY.items():
             for rol, texto in dialogo.items():
@@ -102,8 +105,28 @@ def guardar_sistema_actualizado(filepath_original='Copia de Tipificaciones V6 (1
         
         pd.DataFrame(scripts_rows).to_excel(writer, sheet_name='Roleplay & Scripts', index=False)
 
-    print(f"Archivo generado exitosamente en: {filepath_salida}")
+    output.seek(0)
+    return output
 
-if __name__ == '__main__':
-    # Ejemplo de ejecución para generar el archivo Excel integrado
-    guardar_sistema_actualizado()
+
+# ==========================================
+# 5. INTERFAZ EN STREAMLIT
+# ==========================================
+st.title("Plataforma de Capacitación CSB")
+
+archivo_subido = st.file_uploader("Sube la plantilla base de Tipificaciones (.xlsx)", type=["xlsx"])
+
+hojas_existentes = None
+if archivo_subido is not None:
+    hojas_existentes = cargar_base_tipificaciones(archivo_subido)
+    st.success("Archivo base cargado correctamente.")
+
+# Generar buffer del Excel integrado
+excel_bytes = generar_excel_en_memoria(hojas_existentes)
+
+st.download_button(
+    label="Descargar Sistema Completo Actualizado (.xlsx)",
+    data=excel_bytes,
+    file_name="Tipificaciones_Con_Cotizador_y_Roleplay.xlsx",
+    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+)
